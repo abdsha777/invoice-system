@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 28, 2024 at 08:10 PM
+-- Generation Time: Apr 29, 2024 at 02:12 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.2.12
 
@@ -42,7 +42,7 @@ CREATE TABLE `business` (
 --
 
 INSERT INTO `business` (`business_id`, `business_name`, `address`, `is_active`, `contact`, `gst_no`, `created_date`) VALUES
-(1, 'ab enterprise', 'pune', 1, '83992929', 'asdasd122d2dasad', '2024-04-28'),
+(1, 'R&R ENTERPRISE', 'pune', 1, '83992929', 'asdasd122d2dasad', '2024-04-28'),
 (3, 'bb', 'bb', 1, 'bb', 'bbb', '2024-04-28');
 
 -- --------------------------------------------------------
@@ -89,7 +89,8 @@ INSERT INTO `employee` (`employee_id`, `employee_name`, `username`, `password`, 
 (2, 'joy', 'joy', '$2y$10$DS/zFfYN.4raI9IeH30N3.t7FaypVIqol5EmMvEGc7E4jJ771CbJ.', 'joy@joy.om', 1, '2024-04-28'),
 (4, 'bb', 'bb', '$2y$10$XKaQh2IvWnpRzvHItm66RuFLAwU6WP5Pia5uYScLFpD1E/cVb5QBC', 'bb', 1, '2024-04-28'),
 (5, 'asdasd', 'asd', '$2y$10$FATJasDDQdxIgR/iz3HYIe5NPV5wtAODNS.IEtdmnKANczNKxVyKO', 'asd', 3, '2024-04-28'),
-(7, 'aS', 'ASDAS', '$2y$10$CSbLAr0KTKtjq7EHyVP79e0dVfx17gSYpEGwBCP1NjcEgpxjQ9Q.q', 'ASDRRR', 3, '2024-04-28');
+(7, 'aS', 'ASDAS', '$2y$10$CSbLAr0KTKtjq7EHyVP79e0dVfx17gSYpEGwBCP1NjcEgpxjQ9Q.q', 'ASDRRR', 3, '2024-04-28'),
+(8, 'aa', 'aa', '$2y$10$LdNh1eGwLYt1H/vOXvjvcOTJdtOHaiEsXAH5J0dP.92oJSJ5iXI3.', 'aa', 1, '2024-04-29');
 
 -- --------------------------------------------------------
 
@@ -137,8 +138,9 @@ CREATE TABLE `product` (
   `product_id` int(11) NOT NULL,
   `product_name` varchar(255) NOT NULL,
   `hns_sac` varchar(40) NOT NULL,
-  `gst` varchar(20) NOT NULL,
+  `gst` decimal(20,0) NOT NULL,
   `rate` decimal(10,0) NOT NULL,
+  `quantity` int(11) NOT NULL,
   `created_date` date NOT NULL DEFAULT current_timestamp(),
   `business_id` int(11) NOT NULL,
   `employee_id` int(11) NOT NULL
@@ -148,9 +150,11 @@ CREATE TABLE `product` (
 -- Dumping data for table `product`
 --
 
-INSERT INTO `product` (`product_id`, `product_name`, `hns_sac`, `gst`, `rate`, `created_date`, `business_id`, `employee_id`) VALUES
-(1, 'apple', 'asdasd', 'asdasd', 22, '2024-04-28', 1, 1),
-(2, 'banana', 'asdasd', 'asdasd', 33, '2024-04-28', 1, 1);
+INSERT INTO `product` (`product_id`, `product_name`, `hns_sac`, `gst`, `rate`, `quantity`, `created_date`, `business_id`, `employee_id`) VALUES
+(1, 'apple', 'asdasd', 8, 22, 12, '2024-04-28', 1, 1),
+(2, 'banana', 'asdasd', 18, 33, 15, '2024-04-28', 1, 1),
+(3, 'Chocolate', 'yto', 28, 777, 1, '2024-04-29', 1, 1),
+(4, 'orange', 'or666', 2, 20, 6, '2024-04-29', 1, 4);
 
 --
 -- Indexes for dumped tables
@@ -215,7 +219,7 @@ ALTER TABLE `customer`
 -- AUTO_INCREMENT for table `employee`
 --
 ALTER TABLE `employee`
-  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `employee_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `invoice`
@@ -233,7 +237,7 @@ ALTER TABLE `invoice_items`
 -- AUTO_INCREMENT for table `product`
 --
 ALTER TABLE `product`
-  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `product_id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
