@@ -1,0 +1,90 @@
+body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    background-color: #c7c7c7;
+
+}
+.sidebar {
+    position: fixed !important;
+    z-index: 1000;
+}
+
+.navbar {
+    height: 60px;
+    width: 100%;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.main-content {
+    margin-left: 150px;
+    padding-top: 56px;
+    height: 100%;
+    overflow-y: auto;
+}
+
+.container-fluid {
+    padding: 20px;
+}
+
+#totalAmount {
+    width: 150px;
+}
+
+/* Sidebar styles */
+.sidebar {
+    position: fixed;
+    top: 60px;
+    bottom: 0;
+    left: 0;
+    width: 150px;
+    background-color: #fff;
+}
+
+.sidebar a {
+    padding: 10px;
+    margin: 2px;
+    border-radius: 5px;
+    display: block;
+    color: #656D76;
+    text-decoration: none;
+}
+
+.sidebar a:hover {
+    background-color: #F0F2F4;
+    text-decoration: none;
+    color: #656D76;
+
+}
+
+.main-content {
+    background-color: #F6F8FA;
+    height: 100vh;
+    padding-left: 22px;
+    padding-right: 22px;
+    padding-top: calc(22px + 60px);
+}
+.row{
+    margin: 0% !important;
+}
+.form-group {
+    margin-bottom: -10px !important;
+}
+.form-group label {
+    font-size: 12px;
+}
+
+.form-control {
+    margin-bottom: 10px !important;
+    font-size: 12px !important;
+}
+.table-bordered{
+    border: none !important;
+}
+.table-bordered td, .table-bordered th {
+    border: none !important; 
+}
+/* Custom styles for input fields in cells */
+.cell-input {
+    margin-bottom: 5px; /* Add margin for separation */
+}

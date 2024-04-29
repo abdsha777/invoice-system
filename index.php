@@ -13,6 +13,8 @@ include './util/checkLogin.php';
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.02.min.css">
     <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/sidebar.css">
 </head>
@@ -47,9 +49,9 @@ include './util/checkLogin.php';
 
         <div class="content-wrapper">
             <div class="content-main">
-                <div style="display: flex; justify-content: space-between;">
-                    <div style="width: 43%; background-color: white; border-radius: 5px; padding: 10px;">
-                        <h3>Buyer's Info</h3>
+                <div style="display: flex; justify-content: space-between; gap: 24px;">
+                    <div style="width: 40%; background-color: white; border-radius: 10px; padding: 16px;">
+                        <h4>Buyer's Info</h4>
                         <form>
                             <div class="form-group">
                                 <label for="buyerName">Name of Buyer</label>
@@ -69,8 +71,8 @@ include './util/checkLogin.php';
                             </div>
                         </form>
                     </div>
-                    <div class="row" style="width: 52%; background-color: white; border-radius: 5px;">
-                        <h2 class="col-12">Bill Info</h2>
+                    <div class="row" style="width: 60%; background-color: white; border-radius: 10px;  padding: 16px;">
+                        <h4 class="col-12">Bill Info</h4>
                         <div class="col-lg-6">
                             <div class="form-group">
                                 <label for="input1">Invoice number</label>
@@ -115,8 +117,8 @@ include './util/checkLogin.php';
                 </div>
 
                 <div class="container-fluid mt-4" style="padding: 20px; background-color: white; border-radius: 5px;">
-                    <table class="table table-bordered" id="editableTable">
-                        <thead>
+                    <table class="table billing-table editableTable" id="editableTable">
+                        <thead style="border-bottom: 1px solid grey; font-size:12px;">
                             <tr>
                                 <th scope="col">Sr. No</th>
                                 <th scope="col">Description of Goods</th>
@@ -131,14 +133,26 @@ include './util/checkLogin.php';
                         </thead>
                         <tbody>
                             <!-- Rows will be dynamically added here -->
+                            <td>1</td>
+                            <td><input type="text" class="table-input desc desc1" /></td>
+                            <td><input type="text" class="table-input hsn" /></td>
+                            <td><input type="number" value="0" min='0' class="table-input gst" /></td>
+                            <td><input type="number" value="1" min='1' class="table-input quantity" /></td>
+                            <td><input type="number" value="0" class="table-input rate" /></td>
+                            <td><input type="number" value="0" class="table-input per" /></td>
+                            <td><input type="number" value="0" class="table-input amount" /></td>
+                            <td>
+                                <button class="btn btn-danger" onclick="deleteRow(this)">Delete</button>
+                            </td>
                         </tbody>
                     </table>
                     <div style="display: flex; justify-content: space-around; align-items: center;">
                         <button id="addRowBtn" class="btn btn-primary">Add Row</button>
-                        <div>
+                        <div class="d-flex gap-1">
                             <label for="totalAmount">Total Amount:</label>
                             <input type="text" id="totalAmount" readonly class="form-control">
                         </div>
+                        <button class="btn btn-success" onclick="saveData()">Save</button>
                     </div>
 
                 </div>
@@ -147,13 +161,96 @@ include './util/checkLogin.php';
     </div>
 
 
-    <!-- <div class="autoComplete_wrapper">
-        <input id="autoComplete" type="search" dir="ltr" spellcheck=false autocorrect="off" autocomplete="off" autocapitalize="off">
-        <input type="rate" id="rate">
-    </div>
-
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.5.3/dist/umd/popper.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/autoComplete.min.js"></script>
+
     <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const tableBody = document.querySelector('.editableTable tbody');
+            const addRowButton = document.querySelector('#addRowBtn');
+
+            let rowCounter = 2;
+
+            addRowButton.addEventListener('click', function() {
+                const newRow = `
+                <tr>
+                    <td>${rowCounter}</td>
+                    <td><input type="text" class="table-input desc desc${rowCounter}" /></td>
+                    <td><input type="text" class="table-input hsn" /></td>
+                    <td><input type="number" value="0" min='0' class="table-input gst" /></td>
+                    <td><input type="number" value="1" min='1' class="table-input quantity" /></td>
+                    <td><input type="number" value="0" class="table-input rate" /></td>
+                    <td><input type="number" value="0" class="table-input per" /></td>
+                    <td><input type="number" value="0" class="table-input amount" /></td>
+                    <td>
+                        <button class="btn btn-danger" onclick="deleteRow(this)">Delete</button>
+                    </td>
+                </tr>
+            `;
+                tableBody.insertAdjacentHTML('beforeend', newRow);
+                setupAutoComplete(rowCounter);
+                rowCounter++;
+            });
+
+            tableBody.addEventListener('change', function(event) {
+                const target = event.target;
+                if (target.classList.contains('quantity')) {
+                    updateAmount(target.parentNode.parentNode);
+                } else if (target.classList.contains('rate')) {
+                    updateAmount(target.parentNode.parentNode);
+                }
+            });
+
+
+            function saveData() {
+                var tableRows = document.querySelectorAll('.billing-table tbody tr');
+                billingData = [];
+                tableRows.forEach(function(row) {
+                    var desc = row.querySelector('.desc').value;
+                    var hsn = row.querySelector('.hsn').value;
+                    var gst = row.querySelector('.gst').value;
+                    var quantity = row.querySelector('.quantity').value;
+                    var rate = row.querySelector('.rate').value;
+                    var per = row.querySelector('.per').value;
+                    billingData.push({
+                        desc: desc,
+                        hsn: hsn,
+                        gst: gst,
+                        quantity: quantity,
+                        rate: rate,
+                        per: per,
+                    });
+                });
+                console.log(billingData); // You can replace console.log with your data storage logic
+            }
+
+        });
+
+        function deleteRow(btn) {
+            var row = btn.parentNode.parentNode;
+            row.parentNode.removeChild(row);
+            totalAmount()
+        }
+
+        function totalAmount() {
+            var total = 0;
+            document.querySelectorAll('.amount').forEach(function(a) {
+                total += parseFloat(a.value);
+            });
+            document.querySelector('#totalAmount').value = total.toFixed(2);
+        }
+
+        function updateAmount(row) {
+            const quantity = parseFloat(row.querySelector('.quantity').value);
+            const rate = parseFloat(row.querySelector('.rate').value);
+            const amount = quantity * rate;
+            row.querySelector('.amount').value = amount.toFixed(2);
+            totalAmount()
+        }
+
+
         var products = [];
         var names = [];
         var auto
@@ -163,13 +260,13 @@ include './util/checkLogin.php';
                 console.log(data);
                 products = data
                 names = data.map(d => d.product_name);
-                setupAutoComplete();
+                setupAutoComplete(1);
             })
             .catch(e => console.log(e))
 
-        function setupAutoComplete() {
-
+        function setupAutoComplete(row) {
             const autoCompleteJS = new autoComplete({
+                selector: ".desc" + row,
                 placeHolder: "Search for Food...",
                 data: {
                     src: names
@@ -177,21 +274,28 @@ include './util/checkLogin.php';
                 resultItem: {
                     highlight: true,
                 },
+                threshold: 0,
+                resultsList: {
+                    maxResults: undefined
+                },
                 events: {
                     input: {
                         selection: (event) => {
-                            console.log(event);
-                            let p = products.filter(p=>p.product_name==event.detail.selection.value)[0]
-                    
-                            document.getElementById('rate').value = p.rate
+                            let p = products.filter(p => p.product_name == event.detail.selection.value)[0]
+                            event.target.parentNode.parentNode.parentNode.querySelector('.hsn').value = p['hns_sac']
+                            event.target.parentNode.parentNode.parentNode.querySelector('.rate').value = p['rate']
+                            event.target.parentNode.parentNode.parentNode.querySelector('.quantity').value = p['quantity']
+                            event.target.parentNode.parentNode.parentNode.querySelector('.gst').value = p['gst']
                             const selection = event.detail.selection.value;
                             autoCompleteJS.input.value = selection;
+
+                            updateAmount(event.target.parentNode.parentNode.parentNode);
                         }
                     }
                 }
             });
         }
-    </script> -->
+    </script>
 </body>
 
 
