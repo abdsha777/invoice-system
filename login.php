@@ -29,9 +29,13 @@
             } else {
                 $arr = mysqli_fetch_assoc($result);
                 if (password_verify($pass, $arr['password'])) {
+                    $_SESSION['employee_id'] = $arr['employee_id'];
                     $_SESSION['name'] = $arr['employee_name'];
                     $_SESSION['email'] = $arr['email'];
-                    $_SESSION['business_id '] = $arr['business_id'];
+                    $_SESSION['business_id'] = $arr['business_id'];
+                    $business = mysqli_query($conn, "select * from business where business_id=" . $arr['business_id']);
+                    $b = mysqli_fetch_assoc($business);
+                    $_SESSION['business_name'] = $b['business_name'];
                     $_SESSION['username'] = $arr['username'];
                     $_SESSION['loggedin'] = true;
                     echo ("die");
@@ -72,10 +76,10 @@
     </div>
 
     <script>
-        document.querySelector('.forget-pass').addEventListener('click',()=>{
+        document.querySelector('.forget-pass').addEventListener('click', () => {
             document.querySelector('.modal').classList.add('active')
         })
-        document.querySelector('.close').addEventListener('click',()=>{
+        document.querySelector('.close').addEventListener('click', () => {
             document.querySelector('.modal').classList.remove('active')
         })
     </script>

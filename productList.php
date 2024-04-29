@@ -1,6 +1,61 @@
 <?php
 session_start();
 include './util/checkLogin.php';
+include './connect.php';
+
+$id = "";
+$name = "";
+$hsn = "";
+$rate = "";
+$quantity = "";
+$gst = "";
+
+$inserted = false;
+$updated = false;
+
+if ($_SERVER['REQUEST_METHOD'] == "POST") {
+    $id = $_POST['id'];
+    $name = $_POST['name'];
+    $hsn = $_POST['hsn'];
+    $rate = $_POST['rate'];
+    $quantity = $_POST['quantity'];
+    $gst = $_POST['gst'];
+    if (isset($_POST['add'])) {
+        $sql = "insert into product(product_name,hns_sac,gst,rate,quantity,business_id,employee_id) values('$name','$hsn',$gst,$rate,$quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
+
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $inserted = true;
+        }
+    } else if (isset($_POST['update'])) {
+        $sql = "UPDATE product SET ";
+        $sql .= "product_name = '$name', ";
+        $sql .= "hns_sac = '$hsn', ";
+        $sql .= "gst = $gst, ";
+        $sql .= "rate = $rate, ";
+        $sql .= "quantity = $quantity ";
+        $sql .= "WHERE product_id = " . $id ;
+        
+        echo(var_dump($_POST));
+        echo($sql);
+        $result = mysqli_query($conn, $sql);
+        if ($result) {
+            $updated = true;
+            header("Location: " . strtok($_SERVER["REQUEST_URI"], '?'));
+            exit();
+        }
+    }
+} else {
+    if (isset($_GET['upd'])) {
+        $id = $_GET['id'];
+        $name = $_GET['name'];
+        $hsn = $_GET['hsn'];
+        $rate = $_GET['rate'];
+        $quantity = $_GET['quantity'];
+        $gst = $_GET['gst'];
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -50,39 +105,48 @@ include './util/checkLogin.php';
         <div class="content-wrapper">
             <div class="content-main">
                 <div class="container1">
-                    <form class="box">
+                    <form class="box" action="" method="post">
                         <div class="text">Add Goods / Products</div>
                         <hr />
                         <div class="input-row">
                             <div class="input-col">
+                                <input type="hidden" name="id" value="<?= $id ?>">
                                 <div class="input-box width-large">
                                     <label for="p-name">Description of product</label>
-                                    <input type="text" name="p-name" id="p-name" placeholder="-" />
+                                    <input type="text" name="name" id="p-name" placeholder="-" required value="<?= $name ?>" />
                                 </div>
 
                                 <div class="input-box width-medium">
                                     <label for="hsn/sac">HSN/SAC</label>
-                                    <input type="text" name="hsn/sac" id="hsn/sac" placeholder="-" />
+                                    <input type="text" name="hsn" id="hsn/sac" placeholder="-" required value="<?= $hsn ?>" />
                                 </div>
 
                                 <div class="input-box width-medium">
                                     <label for="rate">Rate</label>
-                                    <input type="number" name="rate" id="rate" placeholder="-" />
+                                    <input type="number" name="rate" id="rate" placeholder="-" required value="<?= $rate ?>" />
                                 </div>
 
                                 <div class="input-box width-small">
                                     <label for="quantity">quantity</label>
-                                    <input type="number" name="quantity" id="quantity" placeholder="-" />
+                                    <input type="number" name="quantity" id="quantity" placeholder="-" required value="<?= $quantity ?>" />
                                 </div>
 
                                 <div class="input-box width-small">
-                                    <label for="code">undefined</label>
-                                    <input type="text" name="code" id="code" placeholder="-" />
+                                    <label for="code">GST</label>
+                                    <input type="number" name="gst" id="code" placeholder="-" required value="<?= $gst ?>" />
                                 </div>
 
 
                             </div>
-                            <input type="submit">
+                            <?php
+                            if (isset($_GET['upd'])) {
+                                echo '<input type="submit" name="update" value="Update">';
+                            } else {
+                                echo '<input type="submit" name="add" value="Add">';
+                            }
+
+                            ?>
+
                         </div>
 
                     </form>
@@ -104,96 +168,40 @@ include './util/checkLogin.php';
                                 quantity
                             </th>
                             <th class="width-medium">
-                                undefined
+                                GST
                             </th>
                             <th></th>
                         </tr>
                         <!-- data  -->
-                        <tr>
-                            <td>1</td>
-                            <td>water bottle</td>
-                            <td>1234</td>
-                            <td>100</td>
-                            <td>10</td>
-                            <td>10</td>
-                            <td>
-                                <button class="update">update</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>water bottle</td>
-                            <td>1234</td>
-                            <td>100</td>
-                            <td>10</td>
-                            <td>10</td>
-                            <td>
-                                <button class="update">update</button>
-                            </td>
-                        </tr>
-                        <tr>
-                            <td>1</td>
-                            <td>water bottle</td>
-                            <td>1234</td>
-                            <td>100</td>
-                            <td>10</td>
-                            <td>10</td>
-                            <td>
-                                <button class="update">update</button>
-                            </td>
-                        </tr>
+                        <?php
+
+                        $sql = "Select * from product where business_id=" . $_SESSION['business_id'];
+                        $result = mysqli_query($conn, $sql);
+                        while ($row = mysqli_fetch_assoc($result)) {
+                            echo "
+                                <tr>
+                                <td>" . $row['product_id'] . "</td>
+                                <td>" . $row['product_name'] . "</td>
+                                <td>" . $row['hns_sac'] . "</td>
+                                <td>" . $row['rate'] . "</td>
+                                <td>" . $row['quantity'] . "</td>
+                                <td>" . $row['gst'] . "%</td>
+                                <td>
+                                    <a href='
+                                    ?upd=1&id=" . $row['product_id'] . "&name=" . $row['product_name'] . "&rate=" . $row['rate'] . "&quantity=" . $row['quantity'] . "&gst=" . $row['gst'] . "&hsn=" . $row['hns_sac'] . "
+                                    ' class='update' >update</a>
+                                </td>
+                                </tr>
+                                ";
+                        }
+
+                        ?>
+
                     </table>
                 </div>
             </div>
         </div>
     </div>
-
-
-    <!-- <div class="autoComplete_wrapper">
-        <input id="autoComplete" type="search" dir="ltr" spellcheck=false autocorrect="off" autocomplete="off" autocapitalize="off">
-        <input type="rate" id="rate">
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/autoComplete.min.js"></script>
-    <script>
-        var products = [];
-        var names = [];
-        var auto
-        fetch("http://localhost/invoice-system/api/allProduct.php?bid=1")
-            .then(res => res.json())
-            .then(data => {
-                console.log(data);
-                products = data
-                names = data.map(d => d.product_name);
-                setupAutoComplete();
-            })
-            .catch(e => console.log(e))
-
-        function setupAutoComplete() {
-
-            const autoCompleteJS = new autoComplete({
-                placeHolder: "Search for Food...",
-                data: {
-                    src: names
-                },
-                resultItem: {
-                    highlight: true,
-                },
-                events: {
-                    input: {
-                        selection: (event) => {
-                            console.log(event);
-                            let p = products.filter(p=>p.product_name==event.detail.selection.value)[0]
-                    
-                            document.getElementById('rate').value = p.rate
-                            const selection = event.detail.selection.value;
-                            autoCompleteJS.input.value = selection;
-                        }
-                    }
-                }
-            });
-        }
-    </script> -->
 </body>
 
 
