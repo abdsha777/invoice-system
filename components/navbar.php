@@ -14,7 +14,9 @@
                             <small><?php echo $_SESSION['name'];?></small>
                             <small>Admin</small>
                         </div>
-                        <img class="topLogo rounded-circle border" src="./img/logo.png " alt="">
+                        <a href="logout.php">
+                            <img class="topLogo rounded-circle border" src="./img/logo.png " alt="">
+                        </a>
                     </div>
 
                 </div>
