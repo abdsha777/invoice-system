@@ -297,6 +297,4 @@ include './util/checkLogin.php';
         }
     </script>
 </body>
-
-
 </html>
