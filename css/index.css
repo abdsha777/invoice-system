@@ -5,4 +5,33 @@ body{
     padding: 0;
     box-sizing: border-box;
     font-family: 'Inter';
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    position: relative;
+}
+
+.topLogo{
+    height: 30px;
+    width: 30px;
+    object-fit: cover;
+}
+.main-container{
+    display: flex;
+    flex: 1;
+    background-color: whitesmoke;
+}
+
+.content-wrapper{
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    padding: 24px;
+}
+
+.content-main{
+    max-width: 105ch;
+    width: 100%;
+    /* background-color: white; */
 }

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>product</title>
+    <link rel="stylesheet" href="product.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+        * {
+            font-family: "Poppins", sans-serif;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <form class="box">
+            <div class="text">Add Goods / Products</div>
+            <hr />
+            <div class="input-row">
+                <div class="input-col">
+                    <div class="input-box width-large">
+                        <label for="p-name">Description of product</label>
+                        <input type="text" name="p-name" id="p-name" placeholder="-" />
+                    </div>
+
+                    <div class="input-box width-medium">
+                        <label for="hsn/sac">HSN/SAC</label>
+                        <input type="text" name="hsn/sac" id="hsn/sac" placeholder="-" />
+                    </div>
+
+                    <div class="input-box width-medium">
+                        <label for="rate">Rate</label>
+                        <input type="number" name="rate" id="rate" placeholder="-" />
+                    </div>
+
+                    <div class="input-box width-small">
+                        <label for="quantity">quantity</label>
+                        <input type="number" name="quantity" id="quantity" placeholder="-" />
+                    </div>
+
+                    <div class="input-box width-small">
+                        <label for="code">undefined</label>
+                        <input type="text" name="code" id="code" placeholder="-" />
+                    </div>
+
+
+                </div>
+                <input type="submit" name="add" value="Add">
+            </div>
+
+        </form>
+        <table class="box">
+            <tr>
+                <th>
+                    Sr No
+                </th>
+                <th class="width-large">
+                    Description of product
+                </th>
+                <th class="width-medium">
+                    HSN/SAC
+                </th>
+                <th class="width-medium">
+                    Rate
+                </th>
+                <th class="width-small">
+                    quantity
+                </th>
+                <th class="width-medium">
+                    undefined
+                </th>
+                <th></th>
+            </tr>
+            <!-- data  -->
+            <tr>
+                <td>1</td>
+                <td>water bottle</td>
+                <td>1234</td>
+                <td>100</td>
+                <td>10</td>
+                <td>10</td>
+                <td>
+                    <button class="update">update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>water bottle</td>
+                <td>1234</td>
+                <td>100</td>
+                <td>10</td>
+                <td>10</td>
+                <td>
+                    <button class="update">update</button>
+                </td>
+            </tr>
+            <tr>
+                <td>1</td>
+                <td>water bottle</td>
+                <td>1234</td>
+                <td>100</td>
+                <td>10</td>
+                <td>10</td>
+                <td>
+                    <button class="update">update</button>
+                </td>
+            </tr>
+        </table>
+    </div>
+
+</body>
+
+</html>
