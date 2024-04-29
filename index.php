@@ -1,3 +1,8 @@
+<?php
+    session_start();
+    include './util/checkLogin.php';
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 

@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login</title>
+    <link rel="stylesheet" href="./css/index.css">
+    <link rel="stylesheet" href="./css/login.css">
 </head>
 
 <body>
     <?php
     include './connect.php';
     session_start();
-    var_dump($_SESSION);
     if ($_SERVER['REQUEST_METHOD'] == "POST") {
         $username = $_POST['username'];
         $password = $_POST['password'];
@@ -24,16 +25,18 @@
             $n = mysqli_num_rows($result);
             if ($n == 0) {
                 $dexist = true;
-                echo("User does not exist");
+                echo ("User does not exist");
             } else {
                 $arr = mysqli_fetch_assoc($result);
                 if (password_verify($pass, $arr['password'])) {
-                    $_SESSION['name'] = $arr['name'];
+                    $_SESSION['name'] = $arr['employee_name'];
                     $_SESSION['email'] = $arr['email'];
-                    $_SESSION['business_id '] = $arr['business_id'] ;
+                    $_SESSION['business_id '] = $arr['business_id'];
                     $_SESSION['username'] = $arr['username'];
                     $_SESSION['loggedin'] = true;
-                    // header("location: index.php");
+                    echo ("die");
+                    header("Location: index.php");
+                    exit;
                 } else {
                     $passwrong = true;
                 }
@@ -42,18 +45,24 @@
     }
     ?>
 
-    <h1>login</h1>
-    <form action="" method="post">
-        <div>
-            <label for="username">username</label>
-            <input type="text" name="username" id="username" required>
+    <div class="login-wrapper">
+        <div class="login-box">
+
+            <h1>Sign In</h1>
+            <form action="" method="post" class="login-form">
+                <div class="form-field">
+                    <!-- <label for="username">username</label> -->
+                    <input type="text" name="username" id="username" placeholder="Username" required>
+                </div>
+                <div class="form-field">
+                    <!-- <label for="password">password</label> -->
+                    <input type="text" name="password" id="password" placeholder="Password" required>
+                </div>
+                <button type="submit">Login</button>
+            </form>
         </div>
-        <div>
-            <label for="password">password</label>
-            <input type="text" name="password" id="password" required>
-        </div>
-        <button type="submit">Login</button>
-    </form>
+    </div>
+
 </body>
 
 </html>
