@@ -1,0 +1,32 @@
+body{
+    background-color: whitesmoke;
+}
+
+.sidebar-wrapper{
+    background-color: white;
+    width: 250px;
+    min-height: 100vh;
+}
+.sidebar-items{
+    display: flex;
+    flex-direction: column;
+    padding: 8px;
+}
+.sidebar-item {
+    display: flex;
+    align-items: center;
+    gap:8px;
+    padding: 8px 16px;
+}
+.sidebar-item:hover {
+    background-color: #F0F2F4;
+}
+.sidebar-item p{
+    color: #656D76;
+    font-size: 14px;
+    margin: 0;
+}
+.sidebar-item svg{
+    height: 20px;
+    width: 20px;
+}
