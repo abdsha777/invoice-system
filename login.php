@@ -46,6 +46,7 @@
     ?>
 
     <div class="login-wrapper">
+        <p class="brand-name"> <img src="./img/logo.png" alt=""> R & R Enterprises</p>
         <div class="login-box">
 
             <h1>Sign In</h1>
@@ -60,9 +61,25 @@
                 </div>
                 <button type="submit">Login</button>
             </form>
+            <small class="forget-pass">Forget Password</small>
+        </div>
+
+        <div class="modal">
+            <p>Forgot password</p>
+            <p>Please Contact Joy to reset your password.</p>
+            <button class="close">Cancel</button>
         </div>
     </div>
 
+    <script>
+        document.querySelector('.forget-pass').addEventListener('click',()=>{
+            document.querySelector('.modal').classList.add('active')
+        })
+        document.querySelector('.close').addEventListener('click',()=>{
+            document.querySelector('.modal').classList.remove('active')
+        })
+    </script>
 </body>
+
 
 </html>

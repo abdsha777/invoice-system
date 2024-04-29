@@ -3,20 +3,40 @@
     justify-content: center;
     align-items: center;
     height: 100vh;
-    background-color: whitesmoke;
+    background-color: #F6F8FA;
+    position: relative;
+}
+
+.brand-name{
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    font-size: 16px;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+.brand-name img{
+    width: 30px;
+    height: 30px;
+    background-color: rgb(217, 217, 217);
+    border-radius: 50%;
+    object-fit: cover;
 }
 
 .login-box{
-    background-color: white;
-    padding: 16px;
-    width: 400px;
-    box-shadow: 0px 0px 14px #b6b6b6;
-    border-radius: 10px;
+    /* background-color: white;
+    padding: 16px; */
+    width: 360px;
+    /* box-shadow: 0px 0px 14px #b6b6b6;
+    border-radius: 10px; */
 }
 
 .login-box h1{
-    margin: 16px;
+    margin: 32px;
     text-align: center;
+    font-weight: 500;
 }
 
 .login-form{
@@ -32,29 +52,83 @@
 
 .form-field input{
     width: 100%;
-    padding: 8px;
+    padding: 8px 16px;
     font-size: 16px;
     border-radius: 5px;
-    border: 1px solid rgb(204, 204, 204);
+    border: 2px solid #E4E7E9;
     transition: 400ms border;
 }
+.form-field input::placeholder{
+    color: #d7d7d7;
+}
+
 
 .form-field input:focus{
-    border: 1px solid black;
+    border: 2px solid #218CE8;
     outline: 0;
 }
 
 
 .login-form button{
-    background-color: rgb(26, 26, 26);
+    background-color: #2C2C2C;
     color: white;
     border-radius: 5px;
     padding: 8px;
     font-size: 16px;
     transition: .4s all linear;
+    cursor: pointer;
 }
 .login-form button:hover{
     transform: translateY(-2px);
-    background-color: rgb(47, 47, 47);
+    background-color: rgb(32, 32, 32);
     box-shadow: 0px 0px 8px 0px #9c9c9c;
+}
+
+.forget-pass{
+    margin: 16px;
+    display: flex;
+    justify-content: center;
+    color: #656D76;
+    cursor: pointer;
+}
+
+@keyframes appear {
+    from{
+        scale: 0;
+    }
+    to{
+        scale: 1;
+    }
+}
+
+.modal{
+    animation: appear 0.2s linear;
+    position: absolute;
+    width: 400px;
+    background-color: white;
+    padding: 32px;
+    border-radius: 10px;
+    box-shadow: 0px 1px 8px 1px rgb(164, 164, 164);
+    display: none;
+    flex-direction: column;
+    gap: 10px;
+}
+.modal.active{
+    display: flex;
+}
+.modal p{
+    margin: 0;
+}
+.modal p:first-child{
+    font-weight: bold;
+    margin: 8px 0;
+}
+.modal button{
+    background-color: white;
+    color: #656D76;
+    border: 1px solid #656D76;
+    box-shadow: 0px 0px 5px gray;
+    padding: 8px 16px;
+    border-radius: 5px;
+    width: fit-content;
 }
