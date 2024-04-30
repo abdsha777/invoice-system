@@ -588,6 +588,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                 event.target.parentNode.parentNode.parentNode.querySelector('.cstate').value = c['state'];
                                 const selection = event.detail.selection.value;
                                 autoCompleteJS.input.value = selection;
+                                // event.target.readOnly=true;
                             }
                         }
                     }
