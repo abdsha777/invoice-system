@@ -21,7 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     $quantity = $_POST['quantity'];
     $gst = $_POST['gst'];
     if (isset($_POST['add'])) {
-        $sql = "insert into product(product_name,hns_sac,gst,rate,quantity,business_id,employee_id) values('$name','$hsn',$gst,$rate,$quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
+        $sql = "insert into product(product_name,hsn_sac,gst,rate,quantity,business_id,employee_id) values('$name','$hsn',$gst,$rate,$quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
 
         $result = mysqli_query($conn, $sql);
         if ($result) {
@@ -30,7 +30,7 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
     } else if (isset($_POST['update'])) {
         $sql = "UPDATE product SET ";
         $sql .= "product_name = '$name', ";
-        $sql .= "hns_sac = '$hsn', ";
+        $sql .= "hsn_sac = '$hsn', ";
         $sql .= "gst = $gst, ";
         $sql .= "rate = $rate, ";
         $sql .= "quantity = $quantity ";
@@ -64,10 +64,12 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>home</title>
+    <title>Product List</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.02.min.css">
-    <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
+    <!-- <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/sidebar.css">
     <link rel="stylesheet" href="./css/product.css">
@@ -182,13 +184,13 @@ if ($_SERVER['REQUEST_METHOD'] == "POST") {
                                 <tr>
                                 <td>" . $row['product_id'] . "</td>
                                 <td>" . $row['product_name'] . "</td>
-                                <td>" . $row['hns_sac'] . "</td>
+                                <td>" . $row['hsn_sac'] . "</td>
                                 <td>" . $row['rate'] . "</td>
                                 <td>" . $row['quantity'] . "</td>
                                 <td>" . $row['gst'] . "%</td>
                                 <td>
                                     <a href='
-                                    ?upd=1&id=" . $row['product_id'] . "&name=" . $row['product_name'] . "&rate=" . $row['rate'] . "&quantity=" . $row['quantity'] . "&gst=" . $row['gst'] . "&hsn=" . $row['hns_sac'] . "
+                                    ?upd=1&id=" . $row['product_id'] . "&name=" . $row['product_name'] . "&rate=" . $row['rate'] . "&quantity=" . $row['quantity'] . "&gst=" . $row['gst'] . "&hsn=" . $row['hsn_sac'] . "
                                     ' class='update' >update</a>
                                 </td>
                                 </tr>

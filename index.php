@@ -1,6 +1,163 @@
 <?php
 session_start();
 include './util/checkLogin.php';
+include './connect.php';
+
+$success = false;
+$updated = false;
+$cid = "";
+$cname = "";
+$cbname = "";
+$address = "";
+$state = "";
+$invNo = "";
+$paymentMode = "";
+$deliveryNote = "";
+$invDate = "";
+$destination = "";
+$dispatcher = "";
+$terms = "";
+$items = "";
+$gst = "";
+$total = "";
+$aftertax = "";
+$pulledidx = 1;
+
+if (isset($_GET['updId'])) {
+    $id = $_GET['updId'];
+    $invoice = mysqli_query($conn, "Select * from invoice where invoice_id=" . $id);
+    $inv = mysqli_fetch_assoc($invoice);
+
+    $invNo = $inv['invoice_id'];
+    $paymentMode = $inv['payment_mode'];
+    $deliveryNote = $inv['delivery_note'];
+    $invDate = $inv['invoice_date'];
+    $destination = $inv['destination'];
+    $dispatcher = $inv['dispatcher_doc_no'];
+    $terms = $inv['terms'];
+    $gst = $inv['gst'];
+    $total = $inv['total_amount'];
+    $aftertax = $inv['afterTax'];
+
+    $customer = mysqli_query($conn, "Select * from customer where customer_id=" . $inv['customer_id']);
+    $c = mysqli_fetch_assoc($customer);
+
+    $cid = $c['customer_id'];
+    $cname = $c['customer_name'];
+    $cbname = $c['customer_business_name'];
+    $address = $c['address'];
+    $state = $c['state'];
+
+    $employee = mysqli_query($conn, "Select * from employee where employee_id=" . $inv['employee_id']);
+    $e = mysqli_fetch_assoc($employee);
+}
+if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+
+    $cid = $_POST['cid'];
+    $cname = $_POST['cname'];
+    $cbname = $_POST['cbname'];
+    $address = $_POST['address'];
+    $state = $_POST['state'];
+    $invNo = $_POST['invNo'];
+    $paymentMode = $_POST['paymentMode'];
+    $deliveryNote = $_POST['deliveryNote'];
+    $invDate = $_POST['invDate'];
+    $destination = $_POST['destination'];
+    $dispatcher = $_POST['dispatcher'];
+    $terms = $_POST['terms'];
+    $items = $_POST['items'];
+    $gst = $_POST['gst'];
+    $items = json_decode($items);
+    // var_dump($_POST);
+    $total = 0;
+
+    foreach ($items as $i) {
+        $total = $total + ($i->rate * $i->quantity);
+    }
+    $aftertax = $total + ((float)$total * ((float)$gst / 100));
+    if (isset($_POST['update'])) {
+        try {
+            $conn->begin_transaction();
+
+            $sql = "UPDATE customer SET 
+                customer_name = '$cname',
+                customer_business_name = '$cbname',
+                address = '$address',
+                state = '$state' 
+                WHERE customer_id = $cid";
+
+            $invoice = mysqli_query($conn, $sql);
+            $sql = "UPDATE invoice SET 
+                invoice_name = '$cname',
+                total_amount = $total,
+                gst = $gst,
+                afterTax = $aftertax,
+                payment_mode = '$paymentMode',
+                destination = '$destination',
+                delivery_note = '$deliveryNote',
+                dispatcher_doc_no = '$dispatcher',
+                terms = '$terms',
+                invoice_date = '$invDate',
+                employee_id = {$_SESSION['employee_id']}
+                WHERE invoice_id = $invNo";
+
+            $invoice = mysqli_query($conn, $sql);
+            $invoice_id = mysqli_insert_id($conn);
+
+            $sql_delete = "DELETE FROM invoice_items WHERE invoice_id = $invNo";
+            mysqli_query($conn, $sql_delete);
+            
+            // Insert new invoice items
+            // var_dump($items);
+            foreach ($items as $i) {
+                // echo $invNo;
+                $t = $i->rate * $i->quantity;
+                $sql_insert = "INSERT INTO invoice_items (invoice_id, product_id, quantity, rate, total) 
+                               VALUES ($invNo, $i->pid, $i->quantity, $i->rate, $t)";
+                mysqli_query($conn, $sql_insert);
+            }
+
+            // echo "DOne";
+            $conn->commit();
+            $updated = true;
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo ($e->getMessage());
+        }
+    } else {
+        try {
+            $conn->begin_transaction();
+            if ($cid == "") {
+                $sql = "INSERT into customer(customer_name,customer_business_name,address,state,business_id) values ('$cname','$cbname', '$address', '$state', " . $_SESSION['business_id'] . ")";
+                // echo ($sql);
+                $customer = mysqli_query($conn, $sql);
+                $cid = mysqli_insert_id($conn);
+            } else {
+                // $customer = mysqli_query($conn, "select * from customer where customer_id=$cid");
+                // $cid = mysqli_fetch_assoc($customer['customer_id']);
+            }
+
+            $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms',$invDate," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
+
+            $invoice = mysqli_query($conn, $sql);
+            $invoice_id = mysqli_insert_id($conn);
+
+            foreach ($items as $i) {
+                $t = $i->rate * $i->quantity;
+                $sql = "INSERT into invoice_items(invoice_id,product_id,quantity,rate,total) values($invoice_id,$i->pid,$i->quantity,$i->rate,$t)";
+                mysqli_query($conn, $sql);
+            }
+
+            // echo "DOne";
+            $conn->commit();
+            $success = true;
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo ($e->getMessage());
+        }
+    }
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -11,10 +168,10 @@ include './util/checkLogin.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>home</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.02.min.css">
-    <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
-    <!-- <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
+    <!-- <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="./css/index.css">
     <link rel="stylesheet" href="./css/sidebar.css">
 </head>
@@ -49,113 +206,170 @@ include './util/checkLogin.php';
 
         <div class="content-wrapper">
             <div class="content-main">
-                <div style="display: flex; justify-content: space-between; gap: 24px;">
-                    <div style="width: 40%; background-color: white; border-radius: 10px; padding: 16px;">
-                        <h4>Buyer's Info</h4>
-                        <form>
+                <?php
+                if ($success) {
+                    echo '<div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                    <strong>Bill Created@</strong> See the bill on the <a href="pastOrders.php"> Past Orders</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    ';
+                }
+                if($updated){
+                    echo '<div class="alert alert-success alert-dismissible fade show w-100" role="alert">
+                    <strong>Bill Updated@</strong> See the bill on the <a href="pastOrders.php"> Past Orders</a>
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    ';
+                }
+                ?>
+                <form class="myform" action="" method="POST">
+
+                    <div style="display: flex; justify-content: space-between; gap: 24px;">
+                        <div style="width: 40%; background-color: white; border-radius: 10px; padding: 16px;">
+                            <h4>Buyer's Info</h4>
+                            <!-- <form> -->
+                            <input type="hidden" name="cid" value="<?= $cid ?>">
                             <div class="form-group">
                                 <label for="buyerName">Name of Buyer</label>
-                                <input type="text" class="form-control" id="buyerName">
+                                <input type="text" value="<?= $cname ?>" class="form-control" id="buyerName" name="cname" required />
                             </div>
                             <div class="form-group">
                                 <label for="companyName">Company/Business Name</label>
-                                <input type="text" class="form-control" id="companyName">
+                                <input type="text" value="<?= $cbname ?>" class="form-control" id="companyName" name="cbname" required />
                             </div>
                             <div class="form-group">
                                 <label for="address">Address</label>
-                                <input type="text" class="form-control" id="address">
+                                <input type="text" value="<?= $address ?>" class="form-control" id="address" name="address" required>
                             </div>
                             <div class="form-group">
                                 <label for="state">State</label>
-                                <input type="text" class="form-control" id="state">
+                                <input type="text" value="<?= $state ?>" class="form-control" id="state" name="state" required>
                             </div>
-                        </form>
-                    </div>
-                    <div class="row" style="width: 60%; background-color: white; border-radius: 10px;  padding: 16px;">
-                        <h4 class="col-12">Bill Info</h4>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="input1">Invoice number</label>
-                                <input type="number" class="form-control" id="input1">
+                            <!-- </form> -->
+                        </div>
+                        <div class="row" style="width: 60%; background-color: white; border-radius: 10px;  padding: 16px;">
+                            <h4 class="col-12">Bill Info</h4>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="input1">Invoice number</label>
+                                    <input type="number" name="invNo" class="form-control" id="input1" value="<?= $invNo ?>" readonly>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input2">Mode of payment</label>
+                                    <select class="form-control" name="paymentMode" id="input2" required value="<?= $paymentMode ?>">
+                                        <option value="cash">Cash</option>
+                                        <option value="credit_card">Credit Card</option>
+                                        <option value="bank_transfer">Bank Transfer</option>
+                                        <!-- Add more options if needed -->
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="input3">Delivery note</label>
+                                    <input type="text" class="form-control" id="input3" name="deliveryNote" required value="<?= $deliveryNote ?>">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="input2">Mode of payment</label>
-                                <select class="form-control" id="input2">
-                                    <option value="cash">Cash</option>
-                                    <option value="credit_card">Credit Card</option>
-                                    <option value="bank_transfer">Bank Transfer</option>
-                                    <!-- Add more options if needed -->
-                                </select>
+                            <div class="col-lg-6">
+                                <div class="form-group">
+                                    <label for="input4">Date</label>
+                                    <input type="date" class="form-control" id="input4" name="invDate" required value="<?= $invDate ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input5">Destination</label>
+                                    <input type="text" class="form-control" id="input5" name="destination" required value="<?= $destination ?>">
+                                </div>
+                                <div class="form-group">
+                                    <label for="input6">Dispatch Document No</label>
+                                    <input type="number" class="form-control" id="input6" name="dispatcher" value="<?= $dispatcher ?>">
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label for="input3">Delivery note</label>
-                                <input type="text" class="form-control" id="input3">
+                            <div class="col-12">
+                                <div class="form-group">
+                                    <label for="input7">Terms of Delivery</label>
+                                    <input type="text" class="form-control" id="input7" style="width: 100%;" name="terms" value="<?= $terms ?>">
+                                </div>
                             </div>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="form-group">
-                                <label for="input4">Date</label>
-                                <input type="date" class="form-control" id="input4">
-                            </div>
-                            <div class="form-group">
-                                <label for="input5">Destination</label>
-                                <input type="text" class="form-control" id="input5">
-                            </div>
-                            <div class="form-group">
-                                <label for="input6">Dispatch Document No</label>
-                                <input type="number" class="form-control" id="input6">
-                            </div>
-                        </div>
-                        <div class="col-12">
-                            <div class="form-group">
-                                <label for="input7">Terms of Delivery</label>
-                                <input type="text" class="form-control" id="input7" style="width: 100%;">
-                            </div>
-                        </div>
-                    </div>
 
-                </div>
-
-                <div class="container-fluid mt-4" style="padding: 20px; background-color: white; border-radius: 5px;">
-                    <table class="table billing-table editableTable" id="editableTable">
-                        <thead style="border-bottom: 1px solid grey; font-size:12px;">
-                            <tr>
-                                <th scope="col">Sr. No</th>
-                                <th scope="col">Description of Goods</th>
-                                <th scope="col">HSN/SAC</th>
-                                <th scope="col">GST</th>
-                                <th scope="col">Quantity</th>
-                                <th scope="col">Rate</th>
-                                <th scope="col">Per</th>
-                                <th scope="col">Amount</th>
-                                <th scope="col">Actions</th> <!-- Add this column for actions -->
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Rows will be dynamically added here -->
-                            <td>1</td>
-                            <td><input type="text" class="table-input desc desc1" /></td>
-                            <td><input type="text" class="table-input hsn" /></td>
-                            <td><input type="number" value="0" min='0' class="table-input gst" /></td>
-                            <td><input type="number" value="1" min='1' class="table-input quantity" /></td>
-                            <td><input type="number" value="0" class="table-input rate" /></td>
-                            <td><input type="number" value="0" class="table-input per" /></td>
-                            <td><input type="number" value="0" class="table-input amount" /></td>
-                            <td>
-                                <button class="btn btn-danger" onclick="deleteRow(this)">Delete</button>
-                            </td>
-                        </tbody>
-                    </table>
-                    <div style="display: flex; justify-content: space-around; align-items: center;">
-                        <button id="addRowBtn" class="btn btn-primary">Add Row</button>
-                        <div class="d-flex gap-1">
-                            <label for="totalAmount">Total Amount:</label>
-                            <input type="text" id="totalAmount" readonly class="form-control">
-                        </div>
-                        <button class="btn btn-success" onclick="saveData()">Save</button>
                     </div>
 
-                </div>
+                    <div class="container-fluid mt-4" style="padding: 20px; background-color: white; border-radius: 5px;">
+                        <table class="table billing-table editableTable" id="editableTable">
+                            <thead style="border-bottom: 1px solid grey; font-size:12px;">
+                                <tr>
+                                    <th scope="col">Sr. No</th>
+                                    <th scope="col">Description of Goods</th>
+                                    <th scope="col">HSN/SAC</th>
+                                    <th scope="col">Quantity</th>
+                                    <th scope="col">Rate</th>
+                                    <th scope="col">Per</th>
+                                    <th scope="col">Amount</th>
+                                    <th scope="col">Actions</th> <!-- Add this column for actions -->
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Rows will be dynamically added here -->
+                                <?php
+                                if (isset($_GET['updId'])) {
+                                    $items = mysqli_query($conn, "Select * from invoice_items where invoice_id=" . $inv['invoice_id']);
+                                    $pulledidx = 1;
+                                    while ($row = mysqli_fetch_assoc($items)) {
+                                        $product = mysqli_query($conn, "Select * from product where product_id=" . $row['product_id']);
+                                        $p = mysqli_fetch_assoc($product);
+                                        echo '<tr>
+                                        <td>'.$pulledidx.'<input type="hidden" name="pid" class="pid" value="' . $row['product_id'] . '" /></td>
+                                        <td><input required readonly required type="text" class="table-input desc desc1" value="' . $p['product_name'] . '" /></td>
+                                        <td><input required required type="text" class="table-input hsn" value="' . $p['hsn_sac'] . '" /></td>
+                                        <td><input required required type="number" value="' . $row['quantity'] . '" min="1" class="table-input quantity" /></td>
+                                        <td><input required required type="number" value="' . $row['rate'] . '" class="table-input rate" /></td>
+                                        <td><input type="number" value="0" class="table-input per" /></td>
+                                        <td><input required required type="number" value="' . ($row['quantity'] * $row['rate']) . '" class="table-input amount" readonly /></td>
+                                        <td>
+                                            <button class="btn btn-danger" type="button" onclick="deleteRow(this)">Delete</button>
+                                        </td>
+                                    </tr>';
+                                    $pulledidx++;
+                                    }
+                                } else {
+                                ?>
+                                    <tr>
+                                        <td>1<input type="hidden" name="pid" class="pid" value="0" /></td>
+                                        <td><input required type="text" class="table-input desc desc1" /></td>
+                                        <td><input required type="text" class="table-input hsn" /></td>
+                                        <td><input required type="number" value="1" min='1' class="table-input quantity" /></td>
+                                        <td><input required type="number" value="0" class="table-input rate" /></td>
+                                        <td><input type="number" value="0" class="table-input per" /></td>
+                                        <td><input required type="number" value="0" class="table-input amount" readonly /></td>
+                                        <td>
+                                            <button class="btn btn-danger" type="button" onclick="deleteRow(this)">Delete</button>
+                                        </td>
+                                    </tr>
+
+                                <?php
+                                }
+                                ?>
+
+                            </tbody>
+                        </table>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <button id="addRowBtn" class="btn btn-primary" type="button">Add Row</button>
+                            <div class="d-flex gap-1 align-items-center">
+                                <label for="totalAmount" class="down-text">Total Amount:</label>
+                                <input type="text" id="totalAmount" readonly class="form-control m-0" name="total" value="<?= $total ?>">
+                            </div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <label for="totalAmount" class="down-text">GST</label>
+                                <input type="number" value="<?= $gst ?>" id="tax" value="0" class="form-control m-0" name="gst">
+                            </div>
+                            <div class="d-flex gap-1 align-items-center">
+                                <label for="totalAmount" class="down-text">After GST</label>
+                                <input type="number" value="<?= $aftertax ?>" id="aftertax" readonly class="form-control m-0" name="aftertax ">
+                            </div>
+                            <button class="btn btn-success saveBtn" type="submit"><?php echo isset($_GET['updId']) ? 'Update' : 'Save'; ?></button>
+                        </div>
+
+                    </div>
+                </form>
+
             </div>
         </div>
     </div>
@@ -168,6 +382,7 @@ include './util/checkLogin.php';
 
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            document.getElementById('input4').valueAsDate = new Date();
             const tableBody = document.querySelector('.editableTable tbody');
             const addRowButton = document.querySelector('#addRowBtn');
 
@@ -176,14 +391,13 @@ include './util/checkLogin.php';
             addRowButton.addEventListener('click', function() {
                 const newRow = `
                 <tr>
-                    <td>${rowCounter}</td>
-                    <td><input type="text" class="table-input desc desc${rowCounter}" /></td>
-                    <td><input type="text" class="table-input hsn" /></td>
-                    <td><input type="number" value="0" min='0' class="table-input gst" /></td>
-                    <td><input type="number" value="1" min='1' class="table-input quantity" /></td>
-                    <td><input type="number" value="0" class="table-input rate" /></td>
-                    <td><input type="number" value="0" class="table-input per" /></td>
-                    <td><input type="number" value="0" class="table-input amount" /></td>
+                    <td>${rowCounter}<input type="hidden" name="pid" class="pid" value="0"/></td>
+                    <td><input required type="text" class="table-input desc desc${rowCounter}" /></td>
+                    <td><input required type="text" class="table-input hsn" /></td>
+                    <td><input required type="number" value="1" min='1' class="table-input quantity" /></td>
+                    <td><input required type="number" value="0" class="table-input rate" /></td>
+                    <td><input required type="number" value="0" class="table-input per" /></td>
+                    <td><input required type="number" value="0" class="table-input amount" readonly /></td>
                     <td>
                         <button class="btn btn-danger" onclick="deleteRow(this)">Delete</button>
                     </td>
@@ -192,6 +406,8 @@ include './util/checkLogin.php';
                 tableBody.insertAdjacentHTML('beforeend', newRow);
                 setupAutoComplete(rowCounter);
                 rowCounter++;
+                removeEnterEvent();
+
             });
 
             tableBody.addEventListener('change', function(event) {
@@ -203,30 +419,73 @@ include './util/checkLogin.php';
                 }
             });
 
+            document.querySelector('#tax').addEventListener('change', totalAmount)
 
-            function saveData() {
-                var tableRows = document.querySelectorAll('.billing-table tbody tr');
-                billingData = [];
-                tableRows.forEach(function(row) {
-                    var desc = row.querySelector('.desc').value;
-                    var hsn = row.querySelector('.hsn').value;
-                    var gst = row.querySelector('.gst').value;
-                    var quantity = row.querySelector('.quantity').value;
-                    var rate = row.querySelector('.rate').value;
-                    var per = row.querySelector('.per').value;
-                    billingData.push({
-                        desc: desc,
-                        hsn: hsn,
-                        gst: gst,
-                        quantity: quantity,
-                        rate: rate,
-                        per: per,
-                    });
-                });
-                console.log(billingData); // You can replace console.log with your data storage logic
-            }
-
+            removeEnterEvent();
         });
+
+        function removeEnterEvent() {
+            document.querySelectorAll('input').forEach(i => {
+                i.addEventListener('keydown', function(event) {
+                    // Check if Enter key was pressed (key code 13)
+                    if (event.keyCode === 13) {
+                        event.preventDefault(); // Prevent default form submission
+                    }
+                })
+            })
+        }
+
+        document.querySelector('.myform').addEventListener('submit', saveData)
+
+        function saveData(e) {
+            e.preventDefault();
+
+            var tableRows = document.querySelectorAll('.billing-table tbody tr');
+            billingData = [];
+            tableRows.forEach(function(row) {
+                var pid = row.querySelector('.pid').value;
+                var desc = row.querySelector('.desc').value;
+                var hsn = row.querySelector('.hsn').value;
+                var quantity = row.querySelector('.quantity').value;
+                var rate = row.querySelector('.rate').value;
+                var per = row.querySelector('.per').value;
+                billingData.push({
+                    pid: pid,
+                    desc: desc,
+                    hsn: hsn,
+                    quantity: quantity,
+                    rate: rate,
+                    per: per,
+                });
+            });
+            console.log(billingData); // You can replace console.log with your data storage logic
+            const form = document.querySelector('.myform');
+            let jsonString = JSON.stringify(billingData);
+            const jsonInput = document.createElement('input');
+            jsonInput.type = 'hidden';
+            jsonInput.name = 'items'; // Name of the input field
+            jsonInput.value = jsonString;
+            form.appendChild(jsonInput);
+
+            <?php
+            if (isset($_GET['updId'])) {
+                echo "
+                    let update = document.createElement('input');
+                    update.type = 'hidden';
+                    update.name = 'update'; // Name of the input field
+                    update.value = 1;
+                    form.appendChild(update);
+                    ";
+            }
+            ?>
+
+            const formData = new FormData(form);
+
+            const formDataObject = Object.fromEntries(formData.entries());
+            console.log(formDataObject);
+            form.submit();
+
+        }
 
         function deleteRow(btn) {
             var row = btn.parentNode.parentNode;
@@ -240,6 +499,9 @@ include './util/checkLogin.php';
                 total += parseFloat(a.value);
             });
             document.querySelector('#totalAmount').value = total.toFixed(2);
+            let gst = document.querySelector('#tax').value;
+            document.querySelector('#aftertax').value = total + (total * (gst / 100));
+
         }
 
         function updateAmount(row) {
@@ -260,7 +522,7 @@ include './util/checkLogin.php';
                 console.log(data);
                 products = data
                 names = data.map(d => d.product_name);
-                setupAutoComplete(1);
+                setupAutoComplete(<?=($pulledidx-1) ?>);
             })
             .catch(e => console.log(e))
 
@@ -282,10 +544,11 @@ include './util/checkLogin.php';
                     input: {
                         selection: (event) => {
                             let p = products.filter(p => p.product_name == event.detail.selection.value)[0]
-                            event.target.parentNode.parentNode.parentNode.querySelector('.hsn').value = p['hns_sac']
+                            event.target.parentNode.parentNode.parentNode.querySelector('.pid').value = p['product_id']
+                            event.target.parentNode.parentNode.parentNode.querySelector('.hsn').value = p['hsn_sac']
                             event.target.parentNode.parentNode.parentNode.querySelector('.rate').value = p['rate']
                             event.target.parentNode.parentNode.parentNode.querySelector('.quantity').value = p['quantity']
-                            event.target.parentNode.parentNode.parentNode.querySelector('.gst').value = p['gst']
+                            // event.target.parentNode.parentNode.parentNode.querySelector('.gst').value = p['gst']
                             const selection = event.detail.selection.value;
                             autoCompleteJS.input.value = selection;
 
@@ -297,4 +560,5 @@ include './util/checkLogin.php';
         }
     </script>
 </body>
+
 </html>

@@ -2,6 +2,22 @@
 session_start();
 include './util/checkLogin.php';
 include "./connect.php";
+if (!isset($_GET['id'])) {
+    header('Location: pastOrders.php');
+    exit();
+} else {
+    $id = $_GET['id'];
+    $invoice = mysqli_query($conn, "Select * from invoice where invoice_id=" . $id);
+    $inv = mysqli_fetch_assoc($invoice);
+
+    $customer = mysqli_query($conn, "Select * from customer where customer_id=" . $inv['customer_id']);
+    $c = mysqli_fetch_assoc($customer);
+
+    $employee = mysqli_query($conn, "Select * from employee where employee_id=" . $inv['employee_id']);
+    $e = mysqli_fetch_assoc($employee);
+
+    $items = mysqli_query($conn, "Select * from invoice_items where invoice_id=" . $inv['invoice_id']);
+}
 ?>
 
 <!DOCTYPE html>
@@ -10,7 +26,7 @@ include "./connect.php";
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Past Orders</title>
+    <title>Order Detail</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.02.min.css">
     <!-- <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
@@ -23,7 +39,6 @@ include "./connect.php";
 
 <body>
     <?php include './components/navbar.php' ?>
-
 
     <div class="main-container">
         <div class="sidebar-wrapper">
@@ -52,62 +67,161 @@ include "./connect.php";
 
         <div class="content-wrapper">
             <div class="content-main">
+                <div class="order-title">
+                    <div class="text6">Invoice No: <?= $id ?></div>
+
+                    <a href="index.php?updId=<?=$id?>">
+                        <button class="update">update</button>
+                    </a>
+                </div>
+                <!-- buyers details / bill info box -->
+
                 <div class="bill-box">
+                    <!-- buyer ka details -->
+                    <div class="box">
+                        <div class="text">Add Goods / Products</div>
+                        <hr />
+                        <!-- bill info  -->
+                        <div class="text-box">
 
-                    <?php
-                    $result = mysqli_query($conn, "SELECT * from invoice where business_id=" . $_SESSION['business_id']);
-                    while ($row = mysqli_fetch_assoc($result)) {
-                        $customer = mysqli_query($conn, "Select * from customer where customer_id=" . $row['customer_id']);
-                        $c = mysqli_fetch_assoc($customer);
+                            <!-- buyer name  -->
+                            <div class="text-frame">
+                                <div class="text4">Buyer's name :</div>
+                                <div class="text5"><?= $c['customer_name'] ?></div>
+                            </div>
+                            <!-- company ka name -->
+                            <div class="text-frame">
+                                <div class="text4">Company / Business name :</div>
+                                <div class="text5"><?= $c['customer_business_name'] ?></div>
+                            </div>
+                            <!-- adress  -->
+                            <div class="text-frame">
+                                <div class="text4">address:</div>
+                                <div class="text5"><?= $c['address'] ?></div>
+                            </div>
+                            <!-- state  -->
+                            <div class="text-frame">
+                                <div class="text4">state :</div>
+                                <div class="text5"><?= $c['state'] ?></div>
+                            </div>
+                        </div>
 
-                        $employee = mysqli_query($conn, "Select * from employee where employee_id=" . $row['employee_id']);
-                        $e = mysqli_fetch_assoc($employee);
 
-                        echo ' <div class="box bill">
-                            <!-- bill info  -->
-                            <div class="text-box">
+
+
+
+                    </div>
+                    <!-- bill info  -->
+                    <div class="box">
+                        <div class="text">Bill info</div>
+                        <hr />
+                        <!-- bill info  -->
+                        <div class="text-box">
+
+                            <div class="text-grid-2-col">
                                 <!-- order no  -->
                                 <div class="text-frame">
-                                    <div class="text4">Order no :</div>
-                                    <div class="text5">' . $row['invoice_id'] . '</div>
-                                </div>
-                                <!-- buyer name  -->
-                                <div class="text-frame">
-                                    <div class="text4">Buyer&#39;s name :</div>
-                                    <div class="text5">' . $row['invoice_name'] . '</div>
-                                </div>
-                                <!-- company ka name -->
-                                <div class="text-frame">
-                                    <div class="text4">Company / Business name :</div>
-                                    <div class="text5">' . $c['customer_business_name'] . '</div>
-                                </div>
-                                <!-- pricing  -->
-                                <div class="text-frame">
-                                    <div class="text4">Price :</div>
-                                    <div class="text5">' . $row['afterTax'] . '</div>
+                                    <div class="text4">order no :</div>
+                                    <div class="text5"><?= $id ?></div>
                                 </div>
                                 <!-- date  -->
                                 <div class="text-frame">
-                                    <div class="text4">Date :</div>
-                                    <div class="text5">' . $row['invoice_date'] . '</div>
+                                    <div class="text4">date :</div>
+                                    <div class="text5"><?= $inv['invoice_date'] ?></div>
                                 </div>
-                                <!-- craeated by  -->
+                                <!-- mode of payment  -->
                                 <div class="text-frame">
-                                    <div class="text4">craeated by :</div>
-                                    <div class="text5">' . $e['employee_name'] . '</div>
+                                    <div class="text4">Mode of payment :</div>
+                                    <div class="text5"><?= $inv['payment_mode'] ?></div>
                                 </div>
+
+                                <!-- destination  -->
+                                <div class="text-frame">
+                                    <div class="text4">destination :</div>
+                                    <div class="text5"><?= $inv['destination'] ?></div>
+                                </div>
+
+                                <!-- delivery note  -->
+                                <div class="text-frame">
+                                    <div class="text4">delivery note :</div>
+                                    <div class="text5"><?= $inv['delivery_note'] ?></div>
+                                </div>
+                                <!-- dispatch document no : -->
+                                <div class="text-frame">
+                                    <div class="text4">dispatch document no :</div>
+                                    <div class="text5"><?= $inv['dispatcher_doc_no'] ?></div>
+                                </div>
+
+
                             </div>
-                            <a href="orderDetail.php?id='.$row['invoice_id'].'">
-                                <button class="view">view</button>
-                            </a>
-                        </div>';
+
+                            <!-- Terms of  Delivery -->
+                            <div class="text-frame">
+                                <div class="text4">Terms of Delivery</div>
+                                <div class="text5"><?= $inv['terms'] ?></div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <table class="box">
+                    <tr>
+                        <th>
+                            Sr No
+                        </th>
+                        <th class="width-large">
+                            Description of product
+                        </th>
+                        <th class="width-medium">
+                            HSN/SAC
+                        </th>
+                        <th class="width-medium">
+                            Rate
+                        </th>
+                        <th class="width-small">
+                            quantity
+                        </th>
+                        <!-- <th class="width-medium">
+                            undefined
+                        </th> -->
+                        <th>
+                            amount
+                        </th>
+                    </tr>
+                    <!-- data  -->
+                    <?php
+                    $idx =1;
+                    while ($row = mysqli_fetch_assoc($items)) {
+                        $product = mysqli_query($conn, "Select * from product where product_id=" . $row['product_id']);
+                        $p = mysqli_fetch_assoc($product);
+                        echo "<tr>
+                            <td>$idx</td>
+                            <td>".$p['product_name']."</td>
+                            <td>".$p['hsn_sac']."</td>
+                            <td>".$row['rate']."</td>
+                            <td>".$row['quantity']."</td>
+                            <td>".$row['total']."</td>
+                            </tr>";
+                        $idx++;
                     }
                     ?>
-                </div>
+
+                    <!-- total gst  -->
+                    <tr>
+                        <td></td>
+                        <td>Total Amount: <?=$inv['total_amount'] ?></td>
+
+                        <td>GST= <?=$inv['gst'] ?>%</td>
+                        <td>total amount with gst=</td>
+
+                        <td class="text6"><?=$inv['afterTax'] ?></td>
+                    </tr>
+
+
+                </table>
             </div>
         </div>
     </div>
-
 </body>
 
 

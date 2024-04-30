@@ -25,7 +25,7 @@
             $n = mysqli_num_rows($result);
             if ($n == 0) {
                 $dexist = true;
-                echo ("User does not exist");
+                // echo ("User does not exist");
             } else {
                 $arr = mysqli_fetch_assoc($result);
                 if (password_verify($pass, $arr['password'])) {
