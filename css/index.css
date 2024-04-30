@@ -70,3 +70,10 @@ body{
 .m-0{
     margin: 0 !important;
 }
+
+.cname{
+    width: 100% !important;
+}
+.autoComplete_wrapper:has(.cname){
+    width: 100%;
+}

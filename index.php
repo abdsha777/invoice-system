@@ -106,7 +106,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
             $sql_delete = "DELETE FROM invoice_items WHERE invoice_id = $invNo";
             mysqli_query($conn, $sql_delete);
-            
+
             // Insert new invoice items
             // var_dump($items);
             foreach ($items as $i) {
@@ -214,7 +214,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                     ';
                 }
-                if($updated){
+                if ($updated) {
                     echo '<div class="alert alert-success alert-dismissible fade show w-100" role="alert">
                     <strong>Bill Updated@</strong> See the bill on the <a href="pastOrders.php"> Past Orders</a>
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
@@ -228,22 +228,22 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <div style="width: 40%; background-color: white; border-radius: 10px; padding: 16px;">
                             <h4>Buyer's Info</h4>
                             <!-- <form> -->
-                            <input type="hidden" name="cid" value="<?= $cid ?>">
+                            <input type="hidden" class="cid" name="cid" value="<?= $cid ?>">
                             <div class="form-group">
                                 <label for="buyerName">Name of Buyer</label>
-                                <input type="text" value="<?= $cname ?>" class="form-control" id="buyerName" name="cname" required />
+                                <input type="text" value="<?= $cname ?>" autocomplete="off"  class="form-control cname" id="buyerName" name="cname" required />
                             </div>
                             <div class="form-group">
                                 <label for="companyName">Company/Business Name</label>
-                                <input type="text" value="<?= $cbname ?>" class="form-control" id="companyName" name="cbname" required />
+                                <input type="text" value="<?= $cbname ?>" class="form-control cbname" id="companyName" name="cbname" required />
                             </div>
                             <div class="form-group">
                                 <label for="address">Address</label>
-                                <input type="text" value="<?= $address ?>" class="form-control" id="address" name="address" required>
+                                <input type="text" value="<?= $address ?>" class="form-control caddress" id="address" name="address" required>
                             </div>
                             <div class="form-group">
                                 <label for="state">State</label>
-                                <input type="text" value="<?= $state ?>" class="form-control" id="state" name="state" required>
+                                <input type="text" value="<?= $state ?>" class="form-control cstate" id="state" name="state" required>
                             </div>
                             <!-- </form> -->
                         </div>
@@ -316,7 +316,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                         $product = mysqli_query($conn, "Select * from product where product_id=" . $row['product_id']);
                                         $p = mysqli_fetch_assoc($product);
                                         echo '<tr>
-                                        <td>'.$pulledidx.'<input type="hidden" name="pid" class="pid" value="' . $row['product_id'] . '" /></td>
+                                        <td>' . $pulledidx . '<input type="hidden" name="pid" class="pid" value="' . $row['product_id'] . '" /></td>
                                         <td><input required readonly required type="text" class="table-input desc desc1" value="' . $p['product_name'] . '" /></td>
                                         <td><input required required type="text" class="table-input hsn" value="' . $p['hsn_sac'] . '" /></td>
                                         <td><input required required type="number" value="' . $row['quantity'] . '" min="1" class="table-input quantity" /></td>
@@ -327,7 +327,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                                             <button class="btn btn-danger" type="button" onclick="deleteRow(this)">Delete</button>
                                         </td>
                                     </tr>';
-                                    $pulledidx++;
+                                        $pulledidx++;
                                     }
                                 } else {
                                 ?>
@@ -515,18 +515,19 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 
         var products = [];
         var names = [];
-        var auto
+        var auto;
         fetch("http://localhost/invoice-system/api/allProduct.php?bid=1")
             .then(res => res.json())
             .then(data => {
                 console.log(data);
                 products = data
                 names = data.map(d => d.product_name);
-                setupAutoComplete(<?=($pulledidx-1) ?>);
+                setupAutoComplete(<?= ($pulledidx - 1) ?>);
             })
             .catch(e => console.log(e))
 
         function setupAutoComplete(row) {
+            if (row == 0) row = 1;
             const autoCompleteJS = new autoComplete({
                 selector: ".desc" + row,
                 placeHolder: "Search for Food...",
@@ -558,6 +559,41 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 }
             });
         }
+
+        var customers = [];
+        var cnames = [];
+        fetch("http://localhost/invoice-system/api/customers.php?bid=1")
+            .then(res => res.json())
+            .then(data => {
+                console.log(data);
+                customers = data
+                cnames = data.map(d => d.customer_name);
+                const autoCompleteJS = new autoComplete({
+                    selector: ".cname",
+                    placeHolder: "Name",
+                    data: {
+                        src: cnames
+                    },
+                    threshold: 0,
+                    resultsList: {
+                        maxResults: undefined
+                    },
+                    events: {
+                        input: {
+                            selection: (event) => {
+                                let c = customers.filter(p => p.customer_name == event.detail.selection.value)[0]
+                                event.target.parentNode.parentNode.parentNode.querySelector('.cid').value = c['customer_id'];
+                                event.target.parentNode.parentNode.parentNode.querySelector('.cbname').value = c['customer_business_name'];
+                                event.target.parentNode.parentNode.parentNode.querySelector('.caddress').value = c['address'];
+                                event.target.parentNode.parentNode.parentNode.querySelector('.cstate').value = c['state'];
+                                const selection = event.detail.selection.value;
+                                autoCompleteJS.input.value = selection;
+                            }
+                        }
+                    }
+                });
+            })
+            .catch(e => console.log(e))
     </script>
 </body>
 

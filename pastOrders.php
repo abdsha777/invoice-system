@@ -55,7 +55,7 @@ include "./connect.php";
                 <div class="bill-box">
 
                     <?php
-                    $result = mysqli_query($conn, "SELECT * from invoice where business_id=" . $_SESSION['business_id']);
+                    $result = mysqli_query($conn, "SELECT * from invoice where business_id=" . $_SESSION['business_id']." ORDER BY invoice_id DESC " );
                     while ($row = mysqli_fetch_assoc($result)) {
                         $customer = mysqli_query($conn, "Select * from customer where customer_id=" . $row['customer_id']);
                         $c = mysqli_fetch_assoc($customer);
