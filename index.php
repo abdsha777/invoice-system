@@ -52,7 +52,6 @@ if (isset($_GET['updId'])) {
     $e = mysqli_fetch_assoc($employee);
 }
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-
     $cid = $_POST['cid'];
     $cname = $_POST['cname'];
     $cbname = $_POST['cbname'];
@@ -125,6 +124,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             echo ($e->getMessage());
         }
     } else {
+        // var_dump($_POST);
         try {
             $conn->begin_transaction();
             if ($cid == "") {
@@ -137,8 +137,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // $cid = mysqli_fetch_assoc($customer['customer_id']);
             }
 
-            $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms',$invDate," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
-
+            $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms','$invDate'," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
+        
             $invoice = mysqli_query($conn, $sql);
             $invoice_id = mysqli_insert_id($conn);
 
@@ -147,9 +147,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $sql = "INSERT into invoice_items(invoice_id,product_id,quantity,rate,total) values($invoice_id,$i->pid,$i->quantity,$i->rate,$t)";
                 mysqli_query($conn, $sql);
             }
-
+            header("Location: invoice.php?id=8");
             // echo "DOne";
-            $conn->commit();
+            // $conn->commit();
             $success = true;
         } catch (Exception $e) {
             $conn->rollback();
@@ -169,7 +169,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     <title>home</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tarekraafat/autocomplete.js@10.2.7/dist/css/autoComplete.02.min.css">
     <!-- <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
-    <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
+    <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
     <link rel="stylesheet" href="./css/index.css">
