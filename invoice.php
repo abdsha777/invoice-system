@@ -1,5 +1,38 @@
 <?php
 
+function getIndianCurrency(float $number)
+{
+    $decimal = round($number - ($no = floor($number)), 2) * 100;
+    $hundred = null;
+    $digits_length = strlen($no);
+    $i = 0;
+    $str = array();
+    $words = array(0 => '', 1 => 'one', 2 => 'two',
+        3 => 'three', 4 => 'four', 5 => 'five', 6 => 'six',
+        7 => 'seven', 8 => 'eight', 9 => 'nine',
+        10 => 'ten', 11 => 'eleven', 12 => 'twelve',
+        13 => 'thirteen', 14 => 'fourteen', 15 => 'fifteen',
+        16 => 'sixteen', 17 => 'seventeen', 18 => 'eighteen',
+        19 => 'nineteen', 20 => 'twenty', 30 => 'thirty',
+        40 => 'forty', 50 => 'fifty', 60 => 'sixty',
+        70 => 'seventy', 80 => 'eighty', 90 => 'ninety');
+    $digits = array('', 'hundred','thousand','lakh', 'crore');
+    while( $i < $digits_length ) {
+        $divider = ($i == 2) ? 10 : 100;
+        $number = floor($no % $divider);
+        $no = floor($no / $divider);
+        $i += $divider == 10 ? 1 : 2;
+        if ($number) {
+            $plural = (($counter = count($str)) && $number > 9) ? 's' : null;
+            $hundred = ($counter == 1 && $str[0]) ? ' and ' : null;
+            $str [] = ($number < 21) ? $words[$number].' '. $digits[$counter]. $plural.' '.$hundred:$words[floor($number / 10) * 10].' '.$words[$number % 10]. ' '.$digits[$counter].$plural.' '.$hundred;
+        } else $str[] = null;
+    }
+    $Rupees = implode('', array_reverse($str));
+    $paise = ($decimal > 0) ? "." . ($words[$decimal / 10] . " " . $words[$decimal % 10]) . ' Paise' : '';
+    return ($Rupees ? $Rupees . 'Rupees ' : '') . $paise;
+}
+
 if (!isset($_GET['id'])) {
     header('Location: pastOrders.php');
     exit();
@@ -16,6 +49,7 @@ if (!isset($_GET['id'])) {
     $e = mysqli_fetch_assoc($employee);
 
     $items = mysqli_query($conn, "Select * from invoice_items where invoice_id=" . $inv['invoice_id']);
+    $aftertax = $inv['total_amount']+($inv['total_amount'] * ($inv['gst']) / 100);
 }
 ?>
 <!DOCTYPE html>
@@ -25,371 +59,7 @@ if (!isset($_GET['id'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>INVOICE NO:<?= $id ?> </title>
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-
-        body p {
-            font-size: 10px;
-        }
-
-        section {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-        }
-
-        h1 {
-            margin-top: 40px;
-        }
-
-        .wrapper {
-            border: 1px solid;
-            width: 85%;
-            height: 100%;
-        }
-
-        .top {
-            display: flex;
-            border-bottom: 1px solid;
-            width: 100%;
-            margin: 0;
-            padding: 0;
-        }
-
-        .left {
-            border-right: 1px solid;
-            width: 57%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .left .l1 {
-            padding: 7px;
-            padding-bottom: 1rem;
-        }
-
-        .left .p1 {
-            font-size: 25px;
-            font-weight: bolder;
-            margin-bottom: 3px;
-            color: hsl(240, 99%, 60%)
-        }
-
-        .left .p2 {
-            font-size: 12.5px;
-            color: lightseagreen;
-        }
-
-        .left .p3 {
-            margin-bottom: 1.5rem;
-            font-size: 10px;
-        }
-
-        span {
-            font-weight: bold;
-        }
-
-        .left .l2 {
-            border-top: 1px solid;
-            padding: 7px;
-            padding-bottom: 1rem;
-        }
-
-        .right {
-            display: flex;
-            flex-direction: column;
-            width: 43%;
-        }
-
-        .right .r1 {
-            width: 100%;
-            height: 55%;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .r1 p {
-            width: 50%;
-            text-align: center;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .r1 .p4 {
-            border-right: 1px solid;
-        }
-
-        .r1 p {
-            border-bottom: 1px solid;
-        }
-
-        .right .r2 {
-            width: 100%;
-            padding: 7px;
-        }
-
-        .middle {
-            width: 100%;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .m1 {
-            display: flex;
-
-        }
-
-        .m1 p {
-            height: 1.5rem;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .p5 {
-            width: 4%;
-            border-right: 1px solid;
-        }
-
-        .p6 {
-            width: 43%;
-            border-right: 1px solid;
-        }
-
-        .p7 {
-            width: 10%;
-            border-right: 1px solid;
-        }
-
-        .p8 {
-            width: 10%;
-            border-right: 1px solid;
-        }
-
-        .p9 {
-            width: 10%;
-            border-right: 1px solid;
-        }
-
-        .p10 {
-            width: 8%;
-            border-right: 1px solid;
-        }
-
-        .p11 {
-            width: 15%;
-        }
-
-        .m2 {
-            border-top: 1px solid;
-            width: 100%;
-            height: 35vh;
-            display: flex;
-        }
-
-        .m2 div {
-            height: 100%;
-        }
-
-        .m3 {
-            width: 100%;
-            height: 1.5rem;
-            display: flex;
-            border-top: 1px solid;
-            border-bottom: 1px solid;
-        }
-
-        .m3 .p6 {
-            display: flex;
-            justify-content: flex-end;
-            padding-right: 5px;
-        }
-
-        .m4 {
-            height: 3rem;
-            padding: 5px;
-        }
-
-        .m5 {
-            width: 100%;
-            border-top: 1px solid;
-            display: flex;
-            flex-wrap: wrap;
-        }
-
-        .m51 {
-            width: 45%;
-            border-right: 1px solid;
-        }
-
-        .p12 {
-            height: 1rem;
-            display: flex;
-            justify-content: center;
-            padding: 1px;
-        }
-
-        .p13 {
-            display: flex;
-            justify-content: end;
-            width: 45%;
-            border-right: 1px solid;
-            padding-right: 5px;
-        }
-
-        .m52 {
-            border-right: 1px solid;
-            width: 8%;
-        }
-
-        .p16 {
-            width: 8%;
-            border-right: 1px solid;
-            display: flex;
-            justify-content: center;
-        }
-
-        .p14 {
-            padding-top: 0.3rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        .p15 {
-            padding-bottom: 0.3rem;
-            height: 1rem;
-            display: flex;
-            justify-content: center;
-        }
-
-        .m53 {
-            display: flex;
-            flex-wrap: wrap;
-            width: 30%;
-            border-right: 1px solid;
-        }
-
-        .p17 {
-            width: 50%;
-            height: 50%;
-            border-right: 1px solid;
-            border-bottom: 1px solid;
-            display: flex;
-            justify-content: center;
-
-        }
-
-        .p18 {
-            width: 50%;
-            height: 50%;
-            display: flex;
-            justify-content: center;
-            border-bottom: 1px solid;
-        }
-
-        .p19,
-        .p20,
-        .p21,
-        .p22 {
-            width: 25%;
-            height: 50%;
-            border-right: 1px solid;
-            display: flex;
-            justify-content: center;
-        }
-
-        .p22 {
-            border-right: none;
-        }
-
-        .p23 {
-            border-right: 1px solid;
-            display: flex;
-            justify-content: center;
-            width: 7.5%;
-        }
-
-        .m54 {
-            width: 17%;
-            height: 50%;
-        }
-
-        .p24,
-        .p25 {
-            width: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-
-        .p26 {
-            display: flex;
-            justify-content: center;
-            width: 17%;
-        }
-
-        .m55 {
-            width: 100%;
-            display: flex;
-            border-bottom: 1px solid;
-            border-top: 1px solid;
-        }
-
-        .bottom {
-            border-bottom: 1px solid;
-            padding: 1rem;
-            height: 8rem;
-        }
-
-        .p27 {
-            margin-bottom: 1.5rem;
-        }
-
-        .footer {
-            display: flex;
-            height: 7rem;
-        }
-
-        .f1,
-        .f2 {
-            width: 50%;
-        }
-
-        .f1 {
-            border-right: 1px solid;
-            padding-left: 10px;
-            padding-top: 5px;
-        }
-
-        .p28 {
-            font-style: italic;
-            margin-top: 5px;
-        }
-
-        .p29 {
-            font-weight: bolder;
-            font-size: large;
-            margin-top: 4rem;
-        }
-
-        .f2 {
-            padding-left: 10px;
-        }
-    </style>
+    <link rel="stylesheet" href="./css/invoice.css">
 </head>
 
 <body>
@@ -430,8 +100,8 @@ if (!isset($_GET['id'])) {
                         <p><span>Mode/Terms of
                                 Payment: </span><?= $inv['payment_mode'] ?></p>
 
-                        <p class="p4">Dispatch Document No: <?=$inv['dispatcher_doc_no']?></p>
-                        <p>Destination: <?=$inv['destination']?></p>
+                        <p class="p4">Dispatch Document No: <?= $inv['dispatcher_doc_no'] ?></p>
+                        <p>Destination: <?= $inv['destination'] ?></p>
                         <!-- <table border="1">
                                 <tr>
                                     <td><span>Invoice No. PN-15</span></td>
@@ -464,7 +134,7 @@ if (!isset($_GET['id'])) {
                             </table> -->
                     </div>
                     <div class="r2">
-                        <p><span>Terms of Delivery: </span> <?=$inv['terms']?></p>
+                        <p><span>Terms of Delivery: </span> <?= $inv['terms'] ?></p>
                     </div>
                 </div>
             </div>
@@ -475,25 +145,44 @@ if (!isset($_GET['id'])) {
                     <p class="p7"><span>HSN/SAC</span></p>
                     <p class="p8"><span>Quantity</span></p>
                     <p class="p9"><span>Rate</span></p>
-                    <p class="p10"><span>per</span></p>
                     <p class="p11"><span>Amount</span></p>
                 </div>
                 <div class="m2">
-                    <div class="p5"></div>
-                    <div class="p6"></div>
-                    <div class="p7"></div>
-                    <div class="p8"></div>
-                    <div class="p9"></div>
-                    <div class="p10"></div>
-                    <div class="p11"></div>
+                    <?php
+                    $idx = 1;
+                    foreach ($items as $i) {
+                        $product = mysqli_query($conn, "Select * from product where product_id=" . $i['product_id']);
+                        $p = mysqli_fetch_assoc($product);
+                        echo "
+                            <div class='innerm2'>
+                                <div class='p5'>$idx</div>
+                                <div class='p6'>" . $p['product_name'] . "</div>
+                                <div class='p7'>" . $p['hsn_sac'] . "</div>
+                                <div class='p8'>" . $i['quantity'] . "</div>
+                                <div class='p9'>" . $i['rate'] . "</div>
+                                <div class='p11'>" . $i['total'] . "</div>
+                            </div>
+                        ";
+                        $idx++;
+                    }
+
+                    ?>
+
+                    <div class="innerm3">
+                        <div class="p5"></div>
+                        <div class="p6"></div>
+                        <div class="p7"></div>
+                        <div class="p8"></div>
+                        <div class="p9"></div>
+                        <div class="p11"></div>
+                    </div>
                 </div>
                 <div class="m3">
                     <div class="p5"></div>
                     <div class="p6"><span>Total</span></div>
-                    <div class="p7"></div>
+                    <div class="p7"><?= $inv['total_amount'] ?></div>
                     <div class="p8"></div>
                     <div class="p9"></div>
-                    <div class="p10"></div>
                     <div class="p11"></div>
                 </div>
                 <div class="m4">
@@ -522,17 +211,17 @@ if (!isset($_GET['id'])) {
                     </div>
                     <div class="m55">
                         <p class="p13"><span>Total</span></p>
-                        <p class="p16"><span>0000.00</span></p>
-                        <p class="p23">9%</p>
-                        <p class="p23"><span>000.0</span></p>
-                        <p class="p23">9%</p>
-                        <p class="p23 none"><span>000.0</span></p>
-                        <p class="p26"><span>0000</span></p>
+                        <p class="p16"><span><?= $inv['total_amount']?></span></p>
+                        <p class="p23"><?= $inv['gst'] / 2 ?>%</p>
+                        <p class="p23"><span><?= $inv['total_amount'] * ($inv['gst'] / 2) / 100 ?></span></p>
+                        <p class="p23"><?= $inv['gst'] / 2 ?>%</p>
+                        <p class="p23 none"><span><?= $inv['total_amount'] * ($inv['gst'] / 2) / 100 ?></span></p>
+                        <p class="p26"><span><?= $inv['total_amount']+($inv['total_amount'] * ($inv['gst']) / 100) ?></span></p>
                     </div>
                 </div>
             </div>
             <div class="bottom">
-                <p class="p27"><span>Tax Amount (in words) Seven Hundred Forty Seven</span></p>
+                <p class="p27"><span>Total Amount (in words) <?=getIndianCurrency($aftertax)?></span></p>
                 <p><span>Bank Details Branch Lohegaon Pune</span></p>
                 <p><span>Bank Name : Canara Bank</span></p>
                 <p><span>Current : A/c 0220201001058 </span></p>
@@ -550,7 +239,7 @@ if (!isset($_GET['id'])) {
         </div>
     </section>
     <script>
-        window.print();
+        // window.print();
     </script>
 </body>
 

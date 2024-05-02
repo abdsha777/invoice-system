@@ -582,7 +582,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         input: {
                             selection: (event) => {
                                 let c = customers.filter(p => p.customer_name == event.detail.selection.value)[0]
-                                event.target.parentNode.parentNode.parentNode.querySelector('.cid').value = c['customer_id'];
+                                // event.target.parentNode.parentNode.parentNode.querySelector('.cid').value = c['customer_id'];
                                 event.target.parentNode.parentNode.parentNode.querySelector('.cbname').value = c['customer_business_name'];
                                 event.target.parentNode.parentNode.parentNode.querySelector('.caddress').value = c['address'];
                                 event.target.parentNode.parentNode.parentNode.querySelector('.cstate').value = c['state'];
