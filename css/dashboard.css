@@ -1,0 +1,151 @@
+.upper-box {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    height: 300px;
+}
+
+.box {
+    flex: 1;
+    padding: 20px;
+    background-color: white;
+    border-radius: 5px;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.box-heading {
+    margin: 0;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #D6DCE2;
+    color: #2D2B2E;
+}
+
+.chartBox {
+    padding: 5px;
+    height: 100%;
+    width: 100%;
+}
+
+.mytable {
+    font-size: 12px;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+.head,
+.body {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+}
+
+.body {
+    flex: 1;
+    overflow-y: scroll;
+}
+
+.body::-webkit-scrollbar {
+    width: 5px;
+}
+
+.body::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+.body::-webkit-scrollbar-thumb {
+    background: #acacac;
+}
+
+.body::-webkit-scrollbar-thumb:hover {
+    background: #717171;
+}
+
+.myrow {
+    display: flex;
+    width: 100%;
+}
+
+.myrow p {
+    margin: 0;
+    padding: 5px;
+}
+
+.myrow p:nth-child(1),
+.myrow p:nth-child(3),
+.myrow p:nth-child(4) {
+    flex: 1;
+    text-align: center;
+}
+
+.myrow p:nth-child(2) {
+    flex: 3;
+}
+
+.lower-box {
+    display: flex;
+    flex-direction: column;
+    gap: 0px;
+    width: 100%;
+    border-radius: 5px;
+    background-color: white;
+    margin-top: 20px;
+    padding: 20px;
+}
+.middle{
+    display: flex;
+}
+.right{
+    flex: 2.5;
+    display: flex;
+    flex-direction: column;
+}
+.left{
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+.left img{
+    width: 60%; 
+}
+
+.dataRow {
+    display: flex;
+    gap: 20px;
+    background-color: rgb(246, 246, 246);
+}
+
+.dataRow p {
+    flex: 1;
+    margin: 0;
+    font-size: 12px;
+    padding: 5px;
+}
+.dataRow:nth-last-of-type(even){
+    background-color: rgb(228, 228, 228);
+}
+
+.mt{
+    margin-top: 15px;
+}
+.btnbox{
+    display: flex;
+    justify-content: end;
+    padding: 10px;
+}
+.btn{
+    background-color: #F0F2F4;
+    font-size: 14px;
+    box-shadow: 0px 1px 8px rgb(210, 210, 210);
+    transition: all 0.4s;
+}
+.btn:hover{
+    translate: 0 -1px;
+    background-color: #d6d6d6;
+    box-shadow: 0px 2px 8px rgb(199, 199, 199);
+}

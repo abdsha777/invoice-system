@@ -128,17 +128,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         try {
             $conn->begin_transaction();
             // if ($cid == "") {
-                $sql = "INSERT into customer(customer_name,customer_business_name,address,state,business_id) values ('$cname','$cbname', '$address', '$state', " . $_SESSION['business_id'] . ")";
-                // echo ($sql);
-                $customer = mysqli_query($conn, $sql);
-                $cid = mysqli_insert_id($conn);
+            $sql = "INSERT into customer(customer_name,customer_business_name,address,state,business_id) values ('$cname','$cbname', '$address', '$state', " . $_SESSION['business_id'] . ")";
+            // echo ($sql);
+            $customer = mysqli_query($conn, $sql);
+            $cid = mysqli_insert_id($conn);
             // } else {
-                // $customer = mysqli_query($conn, "select * from customer where customer_id=$cid");
-                // $cid = mysqli_fetch_assoc($customer['customer_id']);
+            // $customer = mysqli_query($conn, "select * from customer where customer_id=$cid");
+            // $cid = mysqli_fetch_assoc($customer['customer_id']);
             // }
 
             $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms','$invDate'," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
-        
+
             $invoice = mysqli_query($conn, $sql);
             $invoice_id = mysqli_insert_id($conn);
 
@@ -146,12 +146,12 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 // $present = mysqli_query($conn,"Select * from product where product_id=".$i->pid);
                 // $n = mysqli_num_rows($present);
                 // var_dump($i);
-                if($i->pid){
+                if ($i->pid) {
                     // echo"yes";
-                }else{
+                } else {
                     echo "no";
-                    $new_product = mysqli_query($conn,"insert into product(product_name,hsn_sac,rate,quantity,business_id,employee_id) values('$i->desc','$i->hsn',$i->rate,$i->quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")");
-                    $i->pid=mysqli_insert_id($conn);
+                    $new_product = mysqli_query($conn, "insert into product(product_name,hsn_sac,rate,quantity,business_id,employee_id) values('$i->desc','$i->hsn',$i->rate,$i->quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")");
+                    $i->pid = mysqli_insert_id($conn);
                 }
                 $t = $i->rate * $i->quantity;
                 $sql = "INSERT into invoice_items(invoice_id,product_id,quantity,rate,total) values($invoice_id,$i->pid,$i->quantity,$i->rate,$t)";
@@ -160,7 +160,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             // echo "DOne";
             $conn->commit();
             $success = true;
-            header("Location: invoice.php?id=".$invoice_id);
+            header("Location: invoice.php?id=" . $invoice_id);
         } catch (Exception $e) {
             $conn->rollback();
             echo ($e->getMessage());
@@ -197,6 +197,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <path d="M13 11.6562V5.28125C13 5.16482 12.9729 5.04998 12.9208 4.94584C12.8687 4.8417 12.7931 4.75111 12.7 4.68125L7.45 0.74375C7.32018 0.646383 7.16228 0.59375 7 0.59375C6.83772 0.59375 6.67982 0.646383 6.55 0.74375L1.3 4.68125C1.20685 4.75111 1.13125 4.8417 1.07918 4.94584C1.02711 5.04998 1 5.16482 1 5.28125V11.6562C1 11.8552 1.07902 12.0459 1.21967 12.1866C1.36032 12.3272 1.55109 12.4062 1.75 12.4062H4.75C4.94891 12.4062 5.13968 12.3272 5.28033 12.1866C5.42098 12.0459 5.5 11.8552 5.5 11.6562V9.40625C5.5 9.20734 5.57902 9.01657 5.71967 8.87592C5.86032 8.73527 6.05109 8.65625 6.25 8.65625H7.75C7.94891 8.65625 8.13968 8.73527 8.28033 8.87592C8.42098 9.01657 8.5 9.20734 8.5 9.40625V11.6562C8.5 11.8552 8.57902 12.0459 8.71967 12.1866C8.86032 12.3272 9.05109 12.4062 9.25 12.4062H12.25C12.4489 12.4062 12.6397 12.3272 12.7803 12.1866C12.921 12.0459 13 11.8552 13 11.6562Z" stroke="#656D76" stroke-linecap="round" stroke-linejoin="round" />
                     </svg>
                     <p>Home</p>
+                </a>
+                <a class="sidebar-item" href="dashboard.php">
+                    <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g id="SVGRepo_bgCarrier" stroke-width="0"></g>
+                        <g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g>
+                        <g id="SVGRepo_iconCarrier">
+                            <path d="M21 21H7.8C6.11984 21 5.27976 21 4.63803 20.673C4.07354 20.3854 3.6146 19.9265 3.32698 19.362C3 18.7202 3 17.8802 3 16.2V3M6 15L10 11L14 15L20 9M20 9V13M20 9H16" stroke="#656D76" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"></path>
+                        </g>
+                    </svg>
+                    <p>Dashboard</p>
                 </a>
                 <a class="sidebar-item" href="pastOrders.php">
                     <svg width="12" height="13" viewBox="0 0 12 13" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -241,7 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <input type="hidden" class="cid" name="cid" value="<?= $cid ?>">
                             <div class="form-group">
                                 <label for="buyerName">Name of Buyer</label>
-                                <input type="text" value="<?= $cname ?>" autocomplete="off"  class="form-control cname" id="buyerName" name="cname" required />
+                                <input type="text" value="<?= $cname ?>" autocomplete="off" class="form-control cname" id="buyerName" name="cname" required />
                             </div>
                             <div class="form-group">
                                 <label for="companyName">Company/Business Name</label>
