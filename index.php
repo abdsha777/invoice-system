@@ -127,15 +127,15 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         // var_dump($_POST);
         try {
             $conn->begin_transaction();
-            if ($cid == "") {
+            // if ($cid == "") {
                 $sql = "INSERT into customer(customer_name,customer_business_name,address,state,business_id) values ('$cname','$cbname', '$address', '$state', " . $_SESSION['business_id'] . ")";
                 // echo ($sql);
                 $customer = mysqli_query($conn, $sql);
                 $cid = mysqli_insert_id($conn);
-            } else {
+            // } else {
                 // $customer = mysqli_query($conn, "select * from customer where customer_id=$cid");
                 // $cid = mysqli_fetch_assoc($customer['customer_id']);
-            }
+            // }
 
             $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms','$invDate'," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
         
@@ -143,14 +143,24 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $invoice_id = mysqli_insert_id($conn);
 
             foreach ($items as $i) {
+                // $present = mysqli_query($conn,"Select * from product where product_id=".$i->pid);
+                // $n = mysqli_num_rows($present);
+                // var_dump($i);
+                if($i->pid){
+                    // echo"yes";
+                }else{
+                    echo "no";
+                    $new_product = mysqli_query($conn,"insert into product(product_name,hsn_sac,rate,quantity,business_id,employee_id) values('$i->desc','$i->hsn',$i->rate,$i->quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")");
+                    $i->pid=mysqli_insert_id($conn);
+                }
                 $t = $i->rate * $i->quantity;
                 $sql = "INSERT into invoice_items(invoice_id,product_id,quantity,rate,total) values($invoice_id,$i->pid,$i->quantity,$i->rate,$t)";
                 mysqli_query($conn, $sql);
             }
-            header("Location: invoice.php?id=8");
             // echo "DOne";
-            // $conn->commit();
+            $conn->commit();
             $success = true;
+            header("Location: invoice.php?id=".$invoice_id);
         } catch (Exception $e) {
             $conn->rollback();
             echo ($e->getMessage());

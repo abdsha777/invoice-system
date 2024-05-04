@@ -63,6 +63,10 @@ if (!isset($_GET['id'])) {
 </head>
 
 <body>
+
+    <a class="goBack" href="index.php">
+        Go Back
+    </a>
     <section>
         <div class="wrapper">
             <div class="top">
@@ -239,7 +243,7 @@ if (!isset($_GET['id'])) {
         </div>
     </section>
     <script>
-        // window.print();
+        window.print();
     </script>
 </body>
 
