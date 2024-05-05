@@ -1,5 +1,5 @@
 <?php
-
+    session_start();
 function getIndianCurrency(float $number)
 {
     $decimal = round($number - ($no = floor($number)), 2) * 100;
@@ -38,6 +38,8 @@ if (!isset($_GET['id'])) {
     exit();
 } else {
     include './connect.php';
+    include './util/checkLogin.php';
+
     $id = $_GET['id'];
     $invoice = mysqli_query($conn, "Select * from invoice where invoice_id=" . $id);
     $inv = mysqli_fetch_assoc($invoice);
@@ -50,6 +52,8 @@ if (!isset($_GET['id'])) {
 
     $items = mysqli_query($conn, "Select * from invoice_items where invoice_id=" . $inv['invoice_id']);
     $aftertax = $inv['total_amount']+($inv['total_amount'] * ($inv['gst']) / 100);
+
+    $b = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * from business where business_id=" . $_SESSION['business_id']));
 }
 ?>
 <!DOCTYPE html>
@@ -72,18 +76,14 @@ if (!isset($_GET['id'])) {
             <div class="top">
                 <div class="left">
                     <div class="l1">
-                        <p class="p1">R. R. Enterprises</p>
-                        <p class="p2">AUTHORISED DEALER , SALES & SERVICES</p>
-                        <p class="p3"><span>Deals in</span> : Electronic Items, Electrical, Tools Kits, Split AC, AMC,
-                            Computer Accessories, Hardware, CCTV Camera, UPS Batteries, 1 KVA
-                            to 50 KVA Uniform Item &Tailoring Services, Furniture, Fabrication,
-                            Civil work, Stationery, Paints & Printing, Packing Materials, D. J SOUND
-                            SYSTEM, All Types & Decorations, Gazebo Tent, Alarm Systems</p>
+                        <p class="p1"><?=$b['business_name']?></p>
+                        <p class="p2"><?=$b['tagline']?></p>
+                        <p class="p3"><span>Deals in</span> : <?=$b['services']?></p>
                         <span>
-                            <p>Address : Shree Hans Avenue Flat No 3 Lane No7D/ 10D4 Tingre Nagar Pune- 411032</p>
-                            <p>Mobile : 9765479112</p>
-                            <p>GSTIN/UIN : 27FZJPS0886K1ZH</p>
-                            <p>E-Mail : r.renterprises1497@gmail.com</p>
+                            <p>Address : <?=$b['address']?></p>
+                            <p>Mobile : <?=$b['contact']?></p>
+                            <p>GSTIN/UIN : <?=$b['gst_no']?></p>
+                            <p>E-Mail : <?=$b['email']?></p>
                         </span>
                     </div>
                     <div class="l2">
@@ -226,10 +226,10 @@ if (!isset($_GET['id'])) {
             </div>
             <div class="bottom">
                 <p class="p27"><span>Total Amount (in words) <?=getIndianCurrency($aftertax)?></span></p>
-                <p><span>Bank Details Branch Lohegaon Pune</span></p>
-                <p><span>Bank Name : Canara Bank</span></p>
-                <p><span>Current : A/c 0220201001058 </span></p>
-                <p><span>IFS Code : CNRB0000220</span></p>
+                <p><span>Bank Details Branch <?=$b['branch']?></span></p>
+                <p><span>Bank Name : <?=$b['bankname']?></span></p>
+                <p><span>Current : A/c <?=$b['accno']?> </span></p>
+                <p><span>IFS Code : <?=$b['ifsc']?></span></p>
             </div>
             <div class="footer">
                 <div class="f1">

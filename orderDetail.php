@@ -83,6 +83,7 @@ if (!isset($_GET['id'])) {
                     <a href="index.php?updId=<?=$id?>">
                         <button class="update">update</button>
                     </a>
+                    <a href="invoice.php?id=<?=$id?>" class="update">Bill</a>
                 </div>
                 <!-- buyers details / bill info box -->
 

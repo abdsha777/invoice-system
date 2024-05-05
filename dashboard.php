@@ -3,6 +3,29 @@ session_start();
 include './util/checkLogin.php';
 include './connect.php';
 
+if($_SERVER['REQUEST_METHOD']=="POST"){
+    $business_name = $_POST['business_name'];
+    $contact = $_POST['contact'];
+    $address = $_POST['address'];
+    $gst_no = $_POST['gst_no'];
+    $email = $_POST['email'];
+    $tagline = $_POST['tagline'];
+    $services = $_POST['services'];
+
+    $u = "Update business set business_name='$business_name',contact='$contact'
+            ,address='$address',gst_no='$gst_no',email='$email',tagline='$tagline',
+            services='$services' where business_id=".$_SESSION['business_id'];
+    if(mysqli_query($conn,$u)){
+        header("Location: dashboard.php");
+        exit();
+    }
+}
+
+
+$upd = false;
+if (isset($_GET['upd'])) {
+    $upd = true;
+}
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +34,7 @@ include './connect.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Product List</title>
+    <title>Dashboard</title>
     <!-- <link href="./css/bootstrap-5.3.3-dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
     <script src="./css/bootstrap-5.3.3-dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script> -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous">
@@ -62,6 +85,7 @@ include './connect.php';
 
         <div class="content-wrapper">
             <div class="content-main">
+                <form action="" method="post">
                 <div class="upper-box">
                     <div class="box">
                         <p class="box-heading">Sales Info</p>
@@ -99,58 +123,142 @@ include './connect.php';
                         </div>
                     </div>
                 </div>
+
+                <?php
+
+                $b = mysqli_fetch_assoc(mysqli_query($conn, "SELECT * from business where business_id=" . $_SESSION['business_id']))
+                ?>
                 <div class="lower-box">
                     <p class="box-heading">Business Details</p>
                     <div class="middle">
-                        <div class="right">
-                            <div class="dataRow">
-                                <p>Business Name</p>
-                                <p>R R Enterprise</p>
+                        <?php
+                        if ($upd) {
+                        ?>
+                            <div class="right">
+                                <div class="dataRow">
+                                    <p>Business Name</p>
+                                    <input type="text" name="business_name" value="<?= $b['business_name'] ?>">
+                                </div>
+                                <div class="dataRow">
+                                    <p>Contact No</p>
+                                    <input type="text" name="contact" value="<?= $b['contact'] ?>">
+                                </div>
+                                <div class="dataRow">
+                                    <p>Address</p>
+                                    <input type="text" name="address" value="<?= $b['address'] ?>">
+                                </div>
+                                <div class="dataRow">
+                                    <p>GSTIN / UIN</p>
+                                    <input type="text" name="gst_no" value="<?= $b['gst_no'] ?>">
+                                </div>
+                                <div class="dataRow">
+                                    <p>Email</p>
+                                    <input type="text" name="email" value="<?= $b['email'] ?>">
+                                </div>
+                                <div class="dataRow">
+                                    <p>Tag Line</p>
+                                    <input type="text" name="tagline" value="<?= $b['tagline'] ?>">
+                                </div>
+                                <div class="dataRow">
+                                    <p>Services</p>
+                                    <textarea name="services" id="" rows="5"><?= $b['services'] ?></textarea>
+                                </div>
                             </div>
-                            <div class="dataRow">
-                                <p>Contact No</p>
-                                <p>4564676788</p>
+                        <?php
+                        } else {
+                        ?>
+                            <div class="right">
+                                <div class="dataRow">
+                                    <p>Business Name</p>
+                                    <p><?= $b['business_name'] ?></p>
+                                </div>
+                                <div class="dataRow">
+                                    <p>Contact No</p>
+                                    <p><?= $b['contact'] ?></p>
+                                </div>
+                                <div class="dataRow">
+                                    <p>Address</p>
+                                    <p><?= $b['address'] ?></p>
+                                </div>
+                                <div class="dataRow">
+                                    <p>GSTIN / UIN</p>
+                                    <p><?= $b['gst_no'] ?></p>
+                                </div>
+                                <div class="dataRow">
+                                    <p>Email</p>
+                                    <p><?= $b['email'] ?></p>
+                                </div>
+                                <div class="dataRow">
+                                    <p>Tag Line</p>
+                                    <p><?= $b['tagline'] ?></p>
+                                </div>
+                                <div class="dataRow">
+                                    <p>Services</p>
+                                    <p><?= $b['services'] ?></p>
+                                </div>
                             </div>
-                            <div class="dataRow">
-                                <p>Address</p>
-                                <p>4564676788</p>
-                            </div>
-                            <div class="dataRow">
-                                <p>GSTIN / UIN</p>
-                                <p>jbA676HBJG</p>
-                            </div>
-                            <div class="dataRow">
-                                <p>Email</p>
-                                <p>ads@asd.com</p>
-                            </div>
-                        </div>
+                        <?php
+                        }
+
+                        ?>
                         <div class="left">
                             <img src="./img/logo.png" alt="">
                         </div>
                     </div>
                     <p class="box-heading mt">Bank Details</p>
-                    <div class="dataRow">
-                        <p>Bank Name</p>
-                        <p>ads@asd.com</p>
-                    </div>
-                    <div class="dataRow">
-                        <p>Account Number</p>
-                        <p>ads@asd.com</p>
-                    </div>
-                    <div class="dataRow">
-                        <p>IFSC Code</p>
-                        <p>ads@asd.com</p>
-                    </div>
-                    <div class="dataRow">
-                        <p>Bank Branch</p>
-                        <p>Nana Peth</p>
-                    </div>
-                    <div class="btnbox">
-                        <a class="btn">
-                            Update
-                        </a>
-                    </div>
+                    <?php
+                    if ($upd) {
+                        ?>
+                            <div class="dataRow">
+                                <p>Bank Name</p>
+                                <input type="text" name="bankname" value="<?= $b['bankname'] ?>">
+                            </div>
+                            <div class="dataRow">
+                                <p>Account Number</p>
+                                <input type="text" name="accno" value="<?= $b['accno'] ?>">
+                            </div>
+                            <div class="dataRow">
+                                <p>IFSC Code</p>
+                                <input type="text" name="ifsc" value="<?= $b['ifsc'] ?>">
+                            </div>
+                            <div class="dataRow">
+                                <p>Bank Branch</p>
+                                <input type="text" name="branch" value="<?= $b['branch'] ?>">
+                            </div>
+                            <div class="btnbox">
+                                <button type="submit" class="btn">
+                                    Update
+                                </button>
+                            </div>
+                        <?php
+                    } else {
+                        ?>
+                            <div class="dataRow">
+                                <p>Bank Name</p>
+                                <p><?= $b['bankname'] ?></p>
+                            </div>
+                            <div class="dataRow">
+                                <p>Account Number</p>
+                                <p><?= $b['accno'] ?></p>
+                            </div>
+                            <div class="dataRow">
+                                <p>IFSC Code</p>
+                                <p><?= $b['ifsc'] ?></p>
+                            </div>
+                            <div class="dataRow">
+                                <p>Bank Branch</p>
+                                <p><?= $b['branch'] ?></p>
+                            </div>
+                            <div class="btnbox">
+                                <a class="btn" href="?upd=1>">
+                                    Update
+                                </a>
+                            </div>
+                        <?php
+                    }
+                    ?>
                 </div>
+                </form>
             </div>
         </div>
     </div>
