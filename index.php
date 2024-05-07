@@ -587,7 +587,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             .then(data => {
                 console.log(data);
                 customers = data
-                cnames = data.map(d => d.customer_name);
+                cnames = Array.from(new Set(data.map(d => d.customer_name))); 
+
                 const autoCompleteJS = new autoComplete({
                     selector: ".cname",
                     placeHolder: "Name",
