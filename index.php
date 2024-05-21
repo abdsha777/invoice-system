@@ -5,6 +5,7 @@ include './connect.php';
 
 $success = false;
 $updated = false;
+$alreadyExist = false;
 $cid = "";
 $cname = "";
 $cbname = "";
@@ -126,41 +127,50 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     } else {
         // var_dump($_POST);
         try {
-            $conn->begin_transaction();
-            // if ($cid == "") {
-            $sql = "INSERT into customer(customer_name,customer_business_name,address,state,business_id) values ('$cname','$cbname', '$address', '$state', " . $_SESSION['business_id'] . ")";
-            // echo ($sql);
-            $customer = mysqli_query($conn, $sql);
-            $cid = mysqli_insert_id($conn);
-            // } else {
-            // $customer = mysqli_query($conn, "select * from customer where customer_id=$cid");
-            // $cid = mysqli_fetch_assoc($customer['customer_id']);
-            // }
+            if (mysqli_num_rows(mysqli_query($conn, "select * from invoice where invoice_id = $invNo ")) > 0) {
+                $alreadyExist = true;
+            } else {
+                $conn->begin_transaction();
+                // if ($cid == "") {
+                $sql = "INSERT into customer(customer_name,customer_business_name,address,state,business_id) values ('$cname','$cbname', '$address', '$state', " . $_SESSION['business_id'] . ")";
+                // echo ($sql);
+                $customer = mysqli_query($conn, $sql);
+                $cid = mysqli_insert_id($conn);
+                // } else {
+                // $customer = mysqli_query($conn, "select * from customer where customer_id=$cid");
+                // $cid = mysqli_fetch_assoc($customer['customer_id']);
+                // }
 
-            $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms','$invDate'," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
-
-            $invoice = mysqli_query($conn, $sql);
-            $invoice_id = mysqli_insert_id($conn);
-
-            foreach ($items as $i) {
-                // $present = mysqli_query($conn,"Select * from product where product_id=".$i->pid);
-                // $n = mysqli_num_rows($present);
-                // var_dump($i);
-                if ($i->pid) {
-                    // echo"yes";
+                if ($invNo) {
+                    $sql = "insert into invoice(invoice_id,invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values($invNo,'$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms','$invDate'," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
                 } else {
-                    echo "no";
-                    $new_product = mysqli_query($conn, "insert into product(product_name,hsn_sac,rate,quantity,business_id,employee_id) values('$i->desc','$i->hsn',$i->rate,$i->quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")");
-                    $i->pid = mysqli_insert_id($conn);
+                    $sql = "insert into invoice(invoice_name,total_amount,gst,afterTax, payment_mode,destination,delivery_note,dispatcher_doc_no,terms,invoice_date,customer_id,business_id,employee_id) values('$cname' ,$total,$gst,$aftertax,'$paymentMode','$destination','$deliveryNote','$dispatcher','$terms','$invDate'," . $cid . "," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")";
                 }
-                $t = $i->rate * $i->quantity;
-                $sql = "INSERT into invoice_items(invoice_id,product_id,quantity,rate,total) values($invoice_id,$i->pid,$i->quantity,$i->rate,$t)";
-                mysqli_query($conn, $sql);
+                // echo ($sql);
+
+                $invoice = mysqli_query($conn, $sql);
+                $invoice_id = mysqli_insert_id($conn);
+
+                foreach ($items as $i) {
+                    // $present = mysqli_query($conn,"Select * from product where product_id=".$i->pid);
+                    // $n = mysqli_num_rows($present);
+                    // var_dump($i);
+                    if ($i->pid) {
+                        // echo"yes";
+                    } else {
+                        echo "no";
+                        $new_product = mysqli_query($conn, "insert into product(product_name,hsn_sac,rate,quantity,business_id,employee_id) values('$i->desc','$i->hsn',$i->rate,$i->quantity," . $_SESSION['business_id'] . "," . $_SESSION['employee_id'] . ")");
+                        $i->pid = mysqli_insert_id($conn);
+                    }
+                    $t = $i->rate * $i->quantity;
+                    $sql = "INSERT into invoice_items(invoice_id,product_id,quantity,rate,total) values($invoice_id,$i->pid,$i->quantity,$i->rate,$t)";
+                    mysqli_query($conn, $sql);
+                }
+                // echo "DOne";
+                $conn->commit();
+                $success = true;
+                header("Location: invoice.php?id=" . $invoice_id);
             }
-            // echo "DOne";
-            $conn->commit();
-            $success = true;
-            header("Location: invoice.php?id=" . $invoice_id);
         } catch (Exception $e) {
             $conn->rollback();
             echo ($e->getMessage());
@@ -241,6 +251,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     </div>
                     ';
                 }
+                if ($alreadyExist) {
+                    echo '<div class="alert alert-warning alert-dismissible fade show w-100" role="alert">
+                    <strong>Bill Already Exists</strong> Invoice number you are trying to use already exists 
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    ';
+                }
                 ?>
                 <form class="myform" action="" method="POST">
 
@@ -272,7 +289,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                             <div class="col-lg-6">
                                 <div class="form-group">
                                     <label for="input1">Invoice number</label>
-                                    <input type="number" name="invNo" class="form-control" id="input1" value="<?= $invNo ?>" readonly>
+                                    <input type="number" name="invNo" class="form-control" id="input1" value="<?= $invNo ?>" <?= isset($_GET['updId']) ? "readonly" : "" ?> />
                                 </div>
                                 <div class="form-group">
                                     <label for="input2">Mode of payment</label>
@@ -587,7 +604,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             .then(data => {
                 console.log(data);
                 customers = data
-                cnames = Array.from(new Set(data.map(d => d.customer_name))); 
+                cnames = Array.from(new Set(data.map(d => d.customer_name)));
 
                 const autoCompleteJS = new autoComplete({
                     selector: ".cname",
